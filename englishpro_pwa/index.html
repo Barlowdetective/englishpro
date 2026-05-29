@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="EnglishPro"/>
+<meta name="theme-color" content="#2d5a3d"/>
+<title>EnglishPro — Advanced English</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#1a1a18;--ink2:#4a4a45;--ink3:#8a8a82;
+  --paper:#faf9f5;--surface:#f2f0e8;--surface2:#e8e5d8;
+  --accent:#2d5a3d;--accent2:#4a8c61;--accent-light:#e8f2eb;
+  --warn:#c45c1a;--warn-light:#fdf0e8;
+  --info:#1a4a7a;--info-light:#e8f0f8;
+  --success:#2a6b3a;--success-light:#e8f5eb;
+  --danger:#8b2020;--danger-light:#fce8e8;
+  --purple:#5a2d8a;--purple-light:#f0eaf8;
+  --gold:#8a6a1a;--gold-light:#fdf5e0;
+  --radius:10px;--radius-lg:16px;
+  --font-display:'DM Serif Display',serif;
+  --font-body:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.6;display:flex;flex-direction:column}
+
+.topbar{flex-shrink:0;padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--surface2);background:var(--paper)}
+.logo{font-family:var(--font-display);font-size:20px}
+.logo span{color:var(--accent2);font-style:italic}
+.streak-badge{font-size:12px;font-weight:500;color:var(--accent);background:var(--accent-light);padding:4px 10px;border-radius:99px}
+
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+
+.bottom-nav{flex-shrink:0;display:flex;border-top:1px solid var(--surface2);background:var(--paper)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;font-family:var(--font-body);font-size:10px;font-weight:500;color:var(--ink3);padding:8px 4px;transition:color .15s}
+.bnav-btn.active{color:var(--accent)}
+.bnav-btn svg{width:22px;height:22px;stroke-width:1.7;fill:none;stroke:currentColor}
+
+.page{display:none;padding:16px}
+.page.active{display:block}
+
+/* ── HOME ── */
+.date-label{font-size:12px;color:var(--ink3);margin-bottom:4px}
+.home-title{font-family:var(--font-display);font-size:24px;margin-bottom:16px}
+.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.daily-tile{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative}
+.daily-tile:active{transform:scale(.98)}
+.daily-tile.done{opacity:.6}
+.tile-cat{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.tile-word{font-family:var(--font-display);font-size:15px;line-height:1.3}
+.tile-check{position:absolute;top:8px;right:10px;font-size:14px;color:var(--success)}
+.home-streak-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.hstat{background:var(--surface);border-radius:var(--radius);padding:10px;text-align:center}
+.hstat-n{font-family:var(--font-display);font-size:20px}
+.hstat-l{font-size:11px;color:var(--ink3);margin-top:2px}
+.week-row{display:flex;gap:6px;margin-bottom:8px}
+.week-day{flex:1;text-align:center}
+.week-day-lbl{font-size:10px;color:var(--ink3);margin-bottom:3px}
+.week-dot{width:28px;height:28px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.wd-done{background:var(--accent);color:#fff}
+.wd-today{background:var(--surface2);color:var(--ink);border:2px solid var(--accent)}
+.wd-empty{background:var(--surface);color:var(--ink3)}
+.section-hdr{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:16px 0 10px}
+
+/* ── CARDS ── */
+.lesson-card{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.card-title{font-family:var(--font-display);font-size:17px;line-height:1.3;flex:1}
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.tag-vocab{background:var(--info-light);color:var(--info)}
+.tag-grammar{background:var(--success-light);color:var(--success)}
+.tag-phrasal{background:var(--warn-light);color:var(--warn)}
+.tag-biz{background:var(--danger-light);color:var(--danger)}
+.tag-idiom{background:var(--purple-light);color:var(--purple)}
+.card-def{color:var(--ink2);font-size:13px;margin-bottom:8px;line-height:1.6}
+.card-ex{font-style:italic;color:var(--ink3);font-size:12px;border-left:2px solid var(--surface2);padding-left:8px;margin-top:4px;line-height:1.5}
+.add-btn{margin-top:10px;font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--radius);border:1px solid var(--surface2);background:var(--surface);color:var(--ink2);cursor:pointer;font-family:var(--font-body)}
+.add-btn.queued{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+
+/* ── CAT FILTER ── */
+.cat-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;-webkit-overflow-scrolling:touch}
+.cat-filter::-webkit-scrollbar{display:none}
+.cat-btn{font-size:12px;font-weight:500;padding:6px 13px;border-radius:99px;border:1px solid var(--surface2);background:var(--surface);color:var(--ink2);cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:var(--font-body)}
+.cat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── SRS ── */
+.srs-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-card{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius);padding:10px;text-align:center}
+.stat-num{font-family:var(--font-display);font-size:20px}
+.stat-lbl{font-size:11px;color:var(--ink3);margin-top:1px}
+.srs-card{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:20px 16px;text-align:center}
+.srs-word{font-family:var(--font-display);font-size:24px;margin:10px 0 6px}
+.srs-hint{font-size:13px;color:var(--ink3);margin-bottom:16px}
+.reveal-btn{font-family:var(--font-body);font-size:14px;font-weight:500;padding:11px 28px;border-radius:var(--radius);border:1px solid var(--surface2);background:var(--surface);cursor:pointer;margin-bottom:14px}
+.srs-def{font-size:14px;color:var(--ink2);margin-bottom:8px;line-height:1.6;text-align:left}
+.srs-ex{font-style:italic;color:var(--ink3);font-size:12px;border-left:2px solid var(--surface2);padding-left:8px;margin-bottom:14px;text-align:left;line-height:1.5}
+.rating-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rate-btn{font-family:var(--font-body);font-size:12px;font-weight:500;padding:9px 4px;border-radius:var(--radius);border:none;cursor:pointer;line-height:1.3}
+.r-forgot{background:var(--danger-light);color:var(--danger)}
+.r-hard{background:var(--warn-light);color:var(--warn)}
+.r-good{background:var(--info-light);color:var(--info)}
+.r-easy{background:var(--success-light);color:var(--success)}
+
+/* ── QUIZ ── */
+.qcard{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:16px}
+.qmeta{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.qnum{font-size:12px;color:var(--ink3);white-space:nowrap}
+.qprog{flex:1;height:3px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.qprog-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.qtxt{font-size:15px;font-weight:500;line-height:1.6;margin-bottom:10px}
+.qctx{font-style:italic;color:var(--ink2);font-size:13px;background:var(--surface);padding:10px 12px;border-left:3px solid var(--accent2);border-radius:0 var(--radius) var(--radius) 0;margin-bottom:12px;line-height:1.6}
+.q-opts{display:flex;flex-direction:column;gap:7px}
+.qopt{text-align:left;padding:11px 13px;border-radius:var(--radius);border:1px solid var(--surface2);background:#fff;cursor:pointer;font-size:13px;color:var(--ink);font-family:var(--font-body);line-height:1.5;width:100%}
+.qopt:active:not(:disabled){transform:scale(.98)}
+.qopt.correct{background:var(--success-light);border-color:var(--success);color:var(--success)}
+.qopt.wrong{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+.qfb{margin-top:10px;padding:10px 12px;border-radius:var(--radius);font-size:13px;line-height:1.6;display:none}
+.qfb.show{display:block}
+.qfb-ok{background:var(--success-light);color:var(--success)}
+.qfb-no{background:var(--danger-light);color:var(--danger)}
+
+/* ── SCORE ── */
+.score-screen{text-align:center;padding:20px 0}
+.score-big{font-family:var(--font-display);font-size:56px;line-height:1}
+.score-grade{color:var(--accent);font-size:16px;font-weight:500;margin:6px 0 20px}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.sg{background:var(--surface);border-radius:var(--radius);padding:10px}
+.sg-n{font-family:var(--font-display);font-size:20px}
+.sg-l{font-size:11px;color:var(--ink3);margin-top:2px}
+.btn-col{display:flex;flex-direction:column;gap:8px}
+.btn{font-family:var(--font-body);font-size:14px;font-weight:500;padding:12px 20px;border-radius:var(--radius);border:1px solid var(--surface2);background:var(--surface);color:var(--ink);cursor:pointer;width:100%;text-align:center}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── LOG ── */
+.log-item{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px}
+.log-q{font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.5}
+.log-yours{font-size:12px;color:var(--danger);margin-bottom:3px}
+.log-correct{font-size:12px;color:var(--success);margin-bottom:6px}
+.log-exp{font-size:12px;color:var(--ink2);line-height:1.6;padding-top:6px;border-top:1px solid var(--surface)}
+.log-meta{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink3)}
+.empty-title{font-family:var(--font-display);font-size:18px;color:var(--ink2);margin-bottom:6px}
+
+.install-tip{background:var(--gold-light);border:1px solid #d4b060;border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--gold);margin-bottom:14px;line-height:1.6;display:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">English<span>Pro</span></div>
+  <div class="streak-badge" id="streak-el">🔥 Day 1</div>
+</div>
+
+<div class="content" id="main-content">
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="install-tip" id="install-tip">
+      <b>Install as app:</b> tap your browser's Share → "Add to Home Screen" for quick daily access.
+    </div>
+    <div class="date-label" id="date-label"></div>
+    <div class="home-title">Today's lesson</div>
+    <div class="daily-grid" id="daily-grid"></div>
+    <div class="section-hdr">This week</div>
+    <div class="week-row" id="week-row"></div>
+    <div class="section-hdr">Your progress</div>
+    <div class="home-streak-row" id="home-stats"></div>
+  </div>
+
+  <!-- DAILY DETAIL (shown when tile tapped) -->
+  <div class="page" id="page-daily">
+    <div id="daily-detail"></div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="page" id="page-library">
+    <div class="cat-filter" id="cat-filter">
+      <button class="cat-btn active" data-cat="all">All</button>
+      <button class="cat-btn" data-cat="vocab">Vocabulary</button>
+      <button class="cat-btn" data-cat="idiom">Idioms</button>
+      <button class="cat-btn" data-cat="grammar">Grammar</button>
+      <button class="cat-btn" data-cat="phrasal">Phrasal verbs</button>
+      <button class="cat-btn" data-cat="biz">Business</button>
+    </div>
+    <div id="library-list"></div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="page" id="page-revision">
+    <div id="revision-content"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="page" id="page-quiz">
+    <div id="quiz-content"></div>
+  </div>
+
+  <!-- LOG -->
+  <div class="page" id="page-log">
+    <div id="log-content"></div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <button class="bnav-btn active" data-page="home">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Today
+  </button>
+  <button class="bnav-btn" data-page="library">
+    <svg viewBox="0 0 24 24"><path d="M4 19V6.2A1.2 1.2 0 015.2 5h11.6A1.2 1.2 0 0118 6.2V19l-7-3-7 3z"/></svg>
+    Library
+  </button>
+  <button class="bnav-btn" data-page="revision">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Revision
+  </button>
+  <button class="bnav-btn" data-page="quiz">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    Quiz
+  </button>
+  <button class="bnav-btn" data-page="log">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    Review
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONTENT POOL — 80+ items, 5 categories
+// ═══════════════════════════════════════════════
+const POOL = [
+  // VOCABULARY (20)
+  {id:'v1',cat:'vocab',title:'Serendipity',tag:'Noun',def:'A happy or beneficial discovery made entirely by chance.',ex:['Meeting my closest friend on that delayed train was pure serendipity.']},
+  {id:'v2',cat:'vocab',title:'Candid',tag:'Adjective',def:'Truthful and frank, even about uncomfortable matters.',ex:['I appreciate your candid feedback — it helped me improve far more than praise would.']},
+  {id:'v3',cat:'vocab',title:'Ambiguous',tag:'Adjective',def:'Open to more than one interpretation; lacking a single clear meaning.',ex:['The contract wording was deliberately ambiguous, leaving room for later dispute.']},
+  {id:'v4',cat:'vocab',title:'Reticent',tag:'Adjective',def:'Reluctant to speak freely; reserved about sharing information.',ex:['She was reticent about her past, rarely discussing her early career.']},
+  {id:'v5',cat:'vocab',title:'Tenacious',tag:'Adjective',def:'Persistent and determined; unwilling to give up despite obstacles.',ex:['His tenacious pursuit of the story eventually led to the groundbreaking exposé.']},
+  {id:'v6',cat:'vocab',title:'Pragmatic',tag:'Adjective',def:'Dealing with things sensibly and realistically, not theoretically.',ex:['A pragmatic approach to the budget cut costs without sacrificing quality.']},
+  {id:'v7',cat:'vocab',title:'Didactic',tag:'Adjective',def:'Intended to teach, often in an overly moralistic or heavy-handed way.',ex:['The film had a didactic tone that some critics found preachy.']},
+  {id:'v8',cat:'vocab',title:'Ephemeral',tag:'Adjective',def:'Lasting for a very short time; transitory.',ex:['Social media fame is ephemeral — here today and forgotten tomorrow.']},
+  {id:'v9',cat:'vocab',title:'Eloquent',tag:'Adjective',def:'Fluent and persuasive in speech or writing.',ex:['Her eloquent closing argument swayed the entire jury.']},
+  {id:'v10',cat:'vocab',title:'Meticulous',tag:'Adjective',def:'Showing great attention to detail; very careful and precise.',ex:['The editor was meticulous, catching every misplaced comma in the manuscript.']},
+  {id:'v11',cat:'vocab',title:'Corroborate',tag:'Verb',def:'To confirm or give support to a statement or theory.',ex:['The witness was called to corroborate the defendant\'s account of events.']},
+  {id:'v12',cat:'vocab',title:'Succinct',tag:'Adjective',def:'Briefly and clearly expressed; to the point.',ex:['His succinct summary covered all the key points in under a minute.']},
+  {id:'v13',cat:'vocab',title:'Proficient',tag:'Adjective',def:'Competent or skilled in doing something.',ex:['She became proficient in Japanese after just two years of study.']},
+  {id:'v14',cat:'vocab',title:'Contentious',tag:'Adjective',def:'Causing or likely to cause disagreement or controversy.',ex:['The new policy proved contentious, dividing the team sharply.']},
+  {id:'v15',cat:'vocab',title:'Discrepancy',tag:'Noun',def:'A difference or inconsistency between two things that should match.',ex:['There was a discrepancy between the invoice total and the amount actually received.']},
+  {id:'v16',cat:'vocab',title:'Inevitable',tag:'Adjective',def:'Certain to happen; unable to be avoided or prevented.',ex:['Given the mounting losses, the company\'s closure seemed inevitable.']},
+  {id:'v17',cat:'vocab',title:'Scrutinise',tag:'Verb',def:'To examine or inspect closely and thoroughly.',ex:['Auditors scrutinised every transaction from the previous fiscal year.']},
+  {id:'v18',cat:'vocab',title:'Articulate',tag:'Adjective / Verb',def:'(adj) Able to speak fluently and clearly. (v) To express an idea clearly.',ex:['She\'s highly articulate — she can articulate complex ideas in plain language.']},
+  {id:'v19',cat:'vocab',title:'Obsolete',tag:'Adjective',def:'No longer in use; outdated and replaced by something newer.',ex:['Many skills that were essential a decade ago are now completely obsolete.']},
+  {id:'v20',cat:'vocab',title:'Volatile',tag:'Adjective',def:'Liable to change rapidly and unpredictably; unstable.',ex:['The market has been volatile this quarter, swinging wildly between gains and losses.']},
+
+  // IDIOMS (16)
+  {id:'i1',cat:'idiom',title:'On the fence',tag:'Idiom',def:'Undecided; not yet having made a clear choice between two options.',ex:["I'm still on the fence about the job offer — the salary is great but the commute is brutal."]},
+  {id:'i2',cat:'idiom',title:'Bite off more than you can chew',tag:'Idiom',def:'To take on more responsibility than you can realistically handle.',ex:['She agreed to lead four projects simultaneously and quickly bit off more than she could chew.']},
+  {id:'i3',cat:'idiom',title:'Pull the rug out from under',tag:'Idiom',def:'To suddenly withdraw support, leaving someone in a difficult position.',ex:['Cancelling the funding a week before launch pulled the rug out from under the whole team.']},
+  {id:'i4',cat:'idiom',title:'Boil the ocean',tag:'Idiom',def:'To attempt something impossibly large in scope; to overcomplicate things.',ex:["Let's not boil the ocean here — focus on the three core features first."]},
+  {id:'i5',cat:'idiom',title:'Get the ball rolling',tag:'Idiom',def:'To start a process or activity that others will then continue.',ex:['I drafted the first proposal to get the ball rolling on the initiative.']},
+  {id:'i6',cat:'idiom',title:'Cut corners',tag:'Idiom',def:'To do something in the easiest or cheapest way, often sacrificing quality.',ex:['They cut corners on the build and the roof started leaking within a year.']},
+  {id:'i7',cat:'idiom',title:'The ball is in your court',tag:'Idiom',def:'It is now up to you to take action or make the next decision.',ex:["I've sent the proposal — the ball is in their court now."]},
+  {id:'i8',cat:'idiom',title:'Burn bridges',tag:'Idiom',def:'To permanently damage a relationship by acting badly or carelessly.',ex:["Don't quit without notice — you don't want to burn bridges in such a small industry."]},
+  {id:'i9',cat:'idiom',title:'Hit the nail on the head',tag:'Idiom',def:'To describe something exactly right; to identify the core issue precisely.',ex:["You hit the nail on the head — poor communication is our biggest problem."]},
+  {id:'i10',cat:'idiom',title:'Spill the beans',tag:'Idiom',def:'To reveal secret or confidential information, usually by accident.',ex:['He spilled the beans about the merger before the official announcement.']},
+  {id:'i11',cat:'idiom',title:'Read between the lines',tag:'Idiom',def:'To understand the hidden meaning behind what is said or written.',ex:["Reading between the lines, I think she's not happy with the new arrangement."]},
+  {id:'i12',cat:'idiom',title:'A blessing in disguise',tag:'Idiom',def:'Something that seems bad at first but turns out to be good.',ex:['Losing that job was a blessing in disguise — it pushed me to start my own business.']},
+  {id:'i13',cat:'idiom',title:'Beat around the bush',tag:'Idiom',def:'To avoid getting to the main point; to talk around a subject.',ex:["Stop beating around the bush and tell me what the problem actually is."]},
+  {id:'i14',cat:'idiom',title:'Under the weather',tag:'Idiom',def:'Feeling slightly ill or unwell.',ex:["I'm a bit under the weather today — I think I'm coming down with a cold."]},
+  {id:'i15',cat:'idiom',title:'The tip of the iceberg',tag:'Idiom',def:'A small, visible part of a much larger, mostly hidden problem or situation.',ex:['Those complaints are just the tip of the iceberg — there are far deeper issues at play.']},
+  {id:'i16',cat:'idiom',title:'Sit on the fence',tag:'Idiom',def:'To deliberately avoid committing to one side in an argument or decision.',ex:['The manager sat on the fence throughout the dispute rather than taking a side.']},
+
+  // GRAMMAR (12)
+  {id:'g1',cat:'grammar',title:'Inverted conditionals',tag:'Grammar',def:'Replaces "if" clauses by moving the auxiliary verb to the front. Used in formal writing and speech.',ex:['Standard: "If I had known, I would have called." → Inverted: "Had I known, I would have called."','Were she to resign, the board would need to reconsider its position.']},
+  {id:'g2',cat:'grammar',title:'Cleft sentences',tag:'Grammar',def:'Uses "It is/was … that/who …" to place strong emphasis on one element of a sentence.',ex:['"It was the budget, not the timeline, that concerned the board most."','It was she who first raised the alarm about the discrepancy.']},
+  {id:'g3',cat:'grammar',title:'Subjunctive mood',tag:'Grammar',def:'Used after verbs of suggestion, demand, or importance. The verb stays in its bare base form regardless of subject.',ex:['I suggest that he be informed immediately.','It is essential that she attend — note "attend", not "attends".']},
+  {id:'g4',cat:'grammar',title:'Dangling modifiers',tag:'Grammar',def:'A phrase that modifies a word not clearly stated in the sentence. Always match the subject of the modifier to the main clause.',ex:['Wrong: "Having reviewed the report, the budget was approved." (Who reviewed it?)','Correct: "Having reviewed the report, the manager approved the budget."']},
+  {id:'g5',cat:'grammar',title:'Nominalization',tag:'Grammar',def:'Converting a verb or adjective into a noun. Common in formal writing but can create unnecessarily heavy prose.',ex:['Verb: "We decided." → Nominalized: "The decision was made."','Use the verb form in most everyday writing; save nominalizations for formal reports.']},
+  {id:'g6',cat:'grammar',title:'Parallel structure',tag:'Grammar',def:'Using the same grammatical form for elements in a list or comparison. Inconsistency in form creates awkward sentences.',ex:['Wrong: "She likes swimming, to hike, and cycling."','Correct: "She likes swimming, hiking, and cycling."']},
+  {id:'g7',cat:'grammar',title:'The Oxford comma',tag:'Grammar',def:'A comma placed before the final item in a list of three or more. Its use can change meaning and prevent ambiguity.',ex:['Without: "I\'d like to thank my parents, Oprah and the President."','With: "I\'d like to thank my parents, Oprah, and the President."']},
+  {id:'g8',cat:'grammar',title:'Past perfect vs simple past',tag:'Grammar',def:'Past perfect (had + past participle) shows an action completed before another past event. Simple past is for a single past event.',ex:['Simple: "She left when I arrived." (roughly simultaneous)','Past perfect: "She had left before I arrived." (she left first, clearly)']},
+  {id:'g9',cat:'grammar',title:'Restrictive vs non-restrictive clauses',tag:'Grammar',def:'Restrictive clauses (no commas) limit the noun. Non-restrictive clauses (with commas) add extra information that could be removed.',ex:['Restrictive: "The report that he submitted was incomplete." (which specific report)','Non-restrictive: "The report, which he submitted on Friday, was incomplete." (extra info)']},
+  {id:'g10',cat:'grammar',title:'Fronting for emphasis',tag:'Grammar',def:'Moving an element from its normal position to the front of the sentence to give it greater emphasis.',ex:['Normal: "I have never seen such dedication."','Fronted: "Never have I seen such dedication." (more emphatic, formal)']},
+  {id:'g11',cat:'grammar',title:'Ellipsis in formal writing',tag:'Grammar',def:'Omitting words that can be understood from context to avoid repetition and improve flow.',ex:['Full: "She can play piano and she can also play guitar."','Ellipsis: "She can play piano and guitar." (second "she can play" omitted)']},
+  {id:'g12',cat:'grammar',title:'Hedging language',tag:'Grammar',def:'Using language that softens statements, shows uncertainty, or avoids strong commitment. Essential in academic and professional writing.',ex:['"The results suggest that…" rather than "The results prove that…"','"It would appear that costs may increase." (hedging with modal + appear)']},
+
+  // PHRASAL VERBS (16)
+  {id:'p1',cat:'phrasal',title:'Brush up on',tag:'Phrasal verb',def:'To refresh or improve a skill or knowledge area you already have.',ex:['I need to brush up on my presentation skills before the conference.']},
+  {id:'p2',cat:'phrasal',title:'Iron out',tag:'Phrasal verb',def:'To resolve remaining problems or discrepancies, especially smaller ones.',ex:['We still need to iron out a few contractual details before the signing.']},
+  {id:'p3',cat:'phrasal',title:'Come across',tag:'Phrasal verb',def:'1. To find something by chance. 2. To make a certain impression on others.',ex:['I came across a fascinating paper while researching the topic.','She comes across as highly competent in client meetings.']},
+  {id:'p4',cat:'phrasal',title:'Bear with',tag:'Phrasal verb',def:'To be patient with someone or tolerate a situation temporarily.',ex:['Bear with me — I just need two more minutes to find the correct file.']},
+  {id:'p5',cat:'phrasal',title:'Get around',tag:'Phrasal verb',def:'To find a way to avoid or overcome an obstacle or restriction.',ex:['She managed to get around the strict deadline by negotiating an extension.']},
+  {id:'p6',cat:'phrasal',title:'Put forward',tag:'Phrasal verb',def:'To present an idea, plan, or candidate for consideration or discussion.',ex:['Several interesting proposals were put forward at the strategy session.']},
+  {id:'p7',cat:'phrasal',title:'Weigh up',tag:'Phrasal verb',def:'To carefully consider the pros and cons of something before deciding.',ex:['I need a few days to weigh up the options before committing.']},
+  {id:'p8',cat:'phrasal',title:'Back down',tag:'Phrasal verb',def:'To withdraw from a position, demand, or argument; to stop insisting.',ex:['After seeing the data, she backed down from her original stance.']},
+  {id:'p9',cat:'phrasal',title:'Narrow down',tag:'Phrasal verb',def:'To reduce a list of possibilities to a smaller, more manageable number.',ex:["We've narrowed down the candidates to three finalists."]},
+  {id:'p10',cat:'phrasal',title:'Follow through',tag:'Phrasal verb',def:'To complete what one has started or promised to do.',ex:['He has great ideas but rarely follows through on them.']},
+  {id:'p11',cat:'phrasal',title:'Draw on',tag:'Phrasal verb',def:'To use information, experience, or a resource as a source.',ex:['Her speech drew on twenty years of field experience.']},
+  {id:'p12',cat:'phrasal',title:'Set aside',tag:'Phrasal verb',def:'1. To save or reserve something. 2. To disregard something temporarily.',ex:["Let's set aside budget concerns for now and focus on the strategy."]},
+  {id:'p13',cat:'phrasal',title:'Break down',tag:'Phrasal verb',def:'1. To stop functioning. 2. To analyse in detail. 3. To lose emotional control.',ex:['Can you break down the cost estimate item by item?']},
+  {id:'p14',cat:'phrasal',title:'Carry out',tag:'Phrasal verb',def:'To complete a task, instruction, or plan; to execute.',ex:['The team carried out extensive testing before the product launch.']},
+  {id:'p15',cat:'phrasal',title:'Fall through',tag:'Phrasal verb',def:'(Of a plan or deal) to fail to happen or be completed.',ex:['The acquisition fell through at the last minute due to regulatory concerns.']},
+  {id:'p16',cat:'phrasal',title:'Build on',tag:'Phrasal verb',def:'To use something already established as a foundation for further development.',ex:['The second phase of the project builds on the success of the pilot.']},
+
+  // BUSINESS (16)
+  {id:'b1',cat:'biz',title:'Circle back',tag:'Business',def:'To return to a topic or issue at a later point after handling other matters.',ex:["Let's park this for now and circle back on Thursday once we have the data."]},
+  {id:'b2',cat:'biz',title:'Streamline',tag:'Business',def:'To make a process more efficient by removing unnecessary complexity.',ex:['The new software streamlined onboarding from three weeks down to five days.']},
+  {id:'b3',cat:'biz',title:'Leverage',tag:'Business',def:'To use a resource, advantage, or position to its maximum effect.',ex:['We can leverage our existing distribution network to enter three new markets at once.']},
+  {id:'b4',cat:'biz',title:'Push back',tag:'Business',def:'To politely challenge or disagree with a proposal in a professional context.',ex:["I'd like to push back on that timeline — four weeks is more realistic than two."]},
+  {id:'b5',cat:'biz',title:'Bandwidth',tag:'Business',def:'The capacity or time a person or team has available for additional work.',ex:["I don't have the bandwidth to take on another project this quarter."]},
+  {id:'b6',cat:'biz',title:'Deliverable',tag:'Business',def:'A tangible output that must be produced as part of a project or agreement.',ex:['The key deliverables for this phase are the wireframes and a working prototype.']},
+  {id:'b7',cat:'biz',title:'Synergy',tag:'Business',def:'The combined effect of two entities working together being greater than the sum of their parts.',ex:['The merger created real synergy — both teams became stronger for it.']},
+  {id:'b8',cat:'biz',title:'Low-hanging fruit',tag:'Business',def:'Tasks or goals that are easy to achieve quickly, especially early in a project.',ex:['Before tackling the complex issues, let\'s go after the low-hanging fruit first.']},
+  {id:'b9',cat:'biz',title:'Stakeholder',tag:'Business',def:'Any person or group with an interest in or affected by an organisation\'s actions.',ex:['We need to consult all key stakeholders before finalising the strategy.']},
+  {id:'b10',cat:'biz',title:'KPI (Key Performance Indicator)',tag:'Business',def:'A measurable value used to evaluate how effectively objectives are being achieved.',ex:['Customer satisfaction score is one of our most important KPIs this year.']},
+  {id:'b11',cat:'biz',title:'Scalable',tag:'Business',def:'Able to grow or be adapted easily to handle a larger workload or market.',ex:['We need a scalable solution — one that still works when we\'re ten times the size.']},
+  {id:'b12',cat:'biz',title:'Actionable',tag:'Business',def:'Clear, specific, and realistic enough to be acted upon immediately.',ex:['The report is interesting, but what we really need is actionable recommendations.']},
+  {id:'b13',cat:'biz',title:'On the same page',tag:'Business',def:'In agreement or having a shared understanding of a situation or plan.',ex:["Before we start, let's make sure we're all on the same page about the objectives."]},
+  {id:'b14',cat:'biz',title:'Pivot',tag:'Business',def:'To make a significant change in strategy or direction, especially in response to market feedback.',ex:['When the original product failed, the startup pivoted to a B2B model.']},
+  {id:'b15',cat:'biz',title:'Due diligence',tag:'Business',def:'The process of thoroughly investigating something before making a decision or commitment.',ex:['We need to complete our due diligence before agreeing to the acquisition.']},
+  {id:'b16',cat:'biz',title:'Align',tag:'Business',def:'To bring people, teams, or plans into agreement and working toward the same goals.',ex:['The first meeting was about aligning the two departments on the project vision.']},
+];
+
+// ═══════════════════════════════════════════════
+//  QUIZ POOL — 20 questions
+// ═══════════════════════════════════════════════
+const QUIZ_POOL = [
+  {q:"Which word means 'open to more than one interpretation'?",cat:'vocab',opts:['Reticent','Candid','Ambiguous','Tenacious'],ans:2,exp:"'Ambiguous' means having multiple possible meanings. 'Reticent' = reluctant to speak; 'candid' = honest; 'tenacious' = persistent."},
+  {q:"Choose the correct inverted conditional:",cat:'grammar',opts:['If had I known, I would have helped.','Had I known about the change, I would have acted sooner.','Have I known, I would have called.','Should I knew, I would have attended.'],ans:1,exp:"Inverted conditionals drop 'if' and move the auxiliary to the front: 'Had I known…' uses past perfect for third conditionals."},
+  {q:"What does 'pull the rug out from under someone' mean?",cat:'idiom',opts:['To give unexpected support','To suddenly withdraw support, leaving them in difficulty','To warn someone of a hidden danger','To flatter someone into agreeing'],ans:1,exp:"This idiom describes the sudden removal of support — like literally yanking a rug from under someone's feet, leaving them with nothing to stand on."},
+  {q:"Which sentence uses 'come across' correctly?",cat:'phrasal',opts:['She comes across as very confident in meetings.','He came across his promotion last week.','They came across the project successfully.','I came across a cold last winter.'],ans:0,exp:"'Come across as' means to make a particular impression. You can also 'come across' something you find by chance, but not promotions or illnesses."},
+  {q:"A colleague says 'I don't have the bandwidth for this.' What do they mean?",cat:'biz',opts:["They have no internet connection","They lack the time or capacity for more work","They don't understand the task","They want a pay rise first"],ans:1,exp:"'Bandwidth' in business means available capacity. Borrowed from technology, it's widely used to describe how much more work a person can realistically take on."},
+  {q:"Which sentence correctly uses the subjunctive?",cat:'grammar',opts:['The board insists that he attends the hearing.','It is vital that she will attend.','I recommend that he be given more time.','She suggested that they should goes first.'],ans:2,exp:"The subjunctive uses the bare infinitive: 'he be given' — not 'is given'. After recommend, suggest, insist, the base form is used regardless of subject."},
+  {q:"Which sentence contains a dangling modifier?",cat:'grammar',opts:['Having reviewed the report, the manager signed off.','Having reviewed the report, it was signed off.','The manager, having reviewed the report, signed off.','After reviewing the report, the manager gave approval.'],ans:1,exp:"In B, 'having reviewed the report' implies 'it' (the document) did the reviewing. The subject of a modifier must match the main clause subject."},
+  {q:"'Let's _____ a few details before we finalise the contract.'",cat:'phrasal',opts:['brush up on','pull the rug out','iron out','get around'],ans:2,exp:"'Iron out' means to resolve remaining difficulties or discrepancies — perfect for settling the final details of a contract."},
+  {q:"What does 'leverage' mean in a business context?",cat:'biz',opts:['To delay a decision','To use a resource or advantage to maximum effect','To challenge a colleague','To set a firm deadline'],ans:1,exp:"In business, 'leverage' is a verb meaning to exploit an asset, skill, or position for maximum benefit — e.g. 'leverage our brand reputation'."},
+  {q:"'It was the timeline, not the budget, that concerned me.' This sentence is an example of:",cat:'grammar',opts:['A dangling modifier','The subjunctive mood','A cleft sentence','An inverted conditional'],ans:2,exp:"A cleft sentence uses 'It is/was + [focus] + that/who + [rest]' to emphasise one element. Here 'the timeline' is brought into sharp focus."},
+  {q:"What does 'ephemeral' mean?",cat:'vocab',opts:['Very important','Lasting only a short time','Difficult to understand','Causing disagreement'],ans:1,exp:"'Ephemeral' means lasting for only a very short time. It often implies something beautiful but fleeting — like fame, cherry blossoms, or a shooting star."},
+  {q:"What does the idiom 'the tip of the iceberg' mean?",cat:'idiom',opts:['The easiest part of a problem','A small visible part of a much larger hidden problem','The most important aspect','Something impossible to solve'],ans:1,exp:"Like an iceberg where 90% is hidden below water, this idiom means the visible problem is just a fraction of a much larger underlying issue."},
+  {q:"Which sentence uses parallel structure correctly?",cat:'grammar',opts:['She enjoys swimming, to run, and cycling.','She enjoys to swim, run, and cycling.','She enjoys swimming, running, and cycling.','She enjoys swim, running, and to cycle.'],ans:2,exp:"Parallel structure requires all items in a list to use the same grammatical form. 'Swimming, running, and cycling' all use the gerund (-ing) form consistently."},
+  {q:"What does 'follow through' mean?",cat:'phrasal',opts:['To investigate something carefully','To complete what you started or promised','To reject a proposal','To delay a decision'],ans:1,exp:"'Follow through' means to carry out or complete something you have started or committed to. 'He has great ideas but rarely follows through on them.'"},
+  {q:"Which word means 'worthy of careful examination; demanding close attention'?",cat:'vocab',opts:['Volatile','Meticulous','Contentious','Succinct'],ans:1,exp:"'Meticulous' means showing great attention to detail — extremely careful and precise. It comes from the Latin 'metus' (fear), originally meaning fearful of making mistakes."},
+  {q:"What does 'due diligence' mean in business?",cat:'biz',opts:['Paying bills on time','Meeting a deadline','Thoroughly investigating before committing to a decision','Delegating tasks efficiently'],ans:2,exp:"Due diligence is the careful investigation of a business, deal, or decision before committing — essential in mergers, investments, and partnerships."},
+  {q:"'I'll _____ the options and get back to you by Friday.'",cat:'phrasal',opts:['fall through','weigh up','set aside','build on'],ans:1,exp:"'Weigh up' means to carefully consider the advantages and disadvantages of different options before making a decision."},
+  {q:"What is 'hedging language' used for in professional writing?",cat:'grammar',opts:['Making statements stronger and more certain','Softening statements to show uncertainty or avoid overcommitment','Making writing shorter and punchier','Connecting sentences more smoothly'],ans:1,exp:"Hedging uses words like 'suggest', 'appear', 'may', 'seem' to soften claims. 'Results suggest…' is more accurate than 'Results prove…' when certainty isn't justified."},
+  {q:"What does 'a blessing in disguise' mean?",cat:'idiom',opts:['A plan that looks good but has hidden flaws','Something that seems bad at first but turns out to be good','An unexpected opportunity that must be seized quickly','A deceptive offer that should be refused'],ans:1,exp:"A blessing in disguise is something that initially appears negative but ultimately leads to a good outcome — like losing a job that leads to a better opportunity."},
+  {q:"What does it mean when a business deal 'falls through'?",cat:'phrasal',opts:['It succeeds at the last minute','It becomes more complicated','It fails to happen or be completed','It gets passed to another team'],ans:2,exp:"'Fall through' means that a plan, deal, or arrangement fails to happen or be completed — often used for negotiations, acquisitions, or agreements that collapse."},
+];
+
+// ═══════════════════════════════════════════════
+//  DAILY LESSON ENGINE
+// ═══════════════════════════════════════════════
+// Each day picks 1 from each category using a deterministic seed
+// based on the date — so every user sees the same daily set
+// but it rotates each day.
+
+function getDayNumber() {
+  const base = new Date('2024-01-01').getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return Math.floor((today - base) / 86400000);
+}
+
+function getDailyItems() {
+  const day = getDayNumber();
+  const cats = ['vocab','idiom','grammar','phrasal','biz'];
+  return cats.map(cat => {
+    const pool = POOL.filter(i => i.cat === cat);
+    const idx = day % pool.length;
+    // offset each category to avoid same-index collisions
+    const offsets = {vocab:0,idiom:3,grammar:7,phrasal:2,biz:5};
+    return pool[(idx + offsets[cat]) % pool.length];
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  STATE & PERSISTENCE
+// ═══════════════════════════════════════════════
+let S = {
+  srs: [],
+  log: [],
+  quiz: null,
+  libCat: 'all',
+  doneToday: [],    // ids of daily items marked read today
+  completedDays: [], // date strings 'YYYY-MM-DD'
+  totalLessons: 0,
+};
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function save() {
+  try { localStorage.setItem('ep2', JSON.stringify({srs:S.srs,log:S.log,doneToday:S.doneToday,completedDays:S.completedDays,totalLessons:S.totalLessons,lastDate:todayStr()})); } catch(e){}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('ep2');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    S.srs = d.srs || [];
+    S.log = d.log || [];
+    S.completedDays = d.completedDays || [];
+    S.totalLessons = d.totalLessons || 0;
+    // Reset doneToday if it's a new day
+    if (d.lastDate === todayStr()) {
+      S.doneToday = d.doneToday || [];
+    } else {
+      S.doneToday = [];
+    }
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function tagClass(cat){ return {vocab:'tag-vocab',idiom:'tag-idiom',grammar:'tag-grammar',phrasal:'tag-phrasal',biz:'tag-biz'}[cat]||'tag-vocab'; }
+function tagLabel(cat){ return {vocab:'Vocabulary',idiom:'Idiom',grammar:'Grammar',phrasal:'Phrasal verb',biz:'Business'}[cat]||cat; }
+function catColor(cat){ return {vocab:'var(--info)',idiom:'var(--purple)',grammar:'var(--success)',phrasal:'var(--warn)',biz:'var(--danger)'}[cat]||'var(--ink3)'; }
+
+// ═══════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.bnav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.dataset.page;
+    document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    switchPage(page);
+  });
+});
+
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('main-content').scrollTop = 0;
+  if (page === 'home') renderHome();
+  if (page === 'library') renderLibrary();
+  if (page === 'revision') renderRevision();
+  if (page === 'quiz') { if (!S.quiz) startQuiz(); renderQuiz(); }
+  if (page === 'log') renderLog();
+}
+
+// ═══════════════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════════════
+function renderHome() {
+  // Date label
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('date-label').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+
+  // Daily tiles
+  const daily = getDailyItems();
+  const allDone = daily.every(item => S.doneToday.includes(item.id));
+  if (allDone && !S.completedDays.includes(todayStr())) {
+    S.completedDays.push(todayStr());
+    S.totalLessons++;
+    save();
+  }
+
+  document.getElementById('daily-grid').innerHTML = daily.map(item => `
+    <div class="daily-tile ${S.doneToday.includes(item.id)?'done':''}" data-id="${item.id}">
+      <div class="tile-cat" style="color:${catColor(item.cat)}">${tagLabel(item.cat)}</div>
+      <div class="tile-word">${item.title}</div>
+      ${S.doneToday.includes(item.id)?'<div class="tile-check">✓</div>':''}
+    </div>`).join('');
+
+  document.querySelectorAll('.daily-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const id = tile.dataset.id;
+      const item = POOL.find(i => i.id === id);
+      if (!item) return;
+      showDailyDetail(item);
+    });
+  });
+
+  // Week strip
+  const weekEl = document.getElementById('week-row');
+  const dayNames = ['S','M','T','W','T','F','S'];
+  const todayDow = now.getDay();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate() - todayDow);
+  weekEl.innerHTML = Array.from({length:7},(_,i)=>{
+    const d = new Date(weekStart); d.setDate(weekStart.getDate()+i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const done = S.completedDays.includes(ds);
+    const isToday = ds === todayStr();
+    const cls = done?'wd-done':isToday?'wd-today':'wd-empty';
+    return `<div class="week-day"><div class="week-day-lbl">${dayNames[i]}</div><div class="week-dot ${cls}">${done?'✓':d.getDate()}</div></div>`;
+  }).join('');
+
+  // Stats
+  const streak = calcStreak();
+  document.getElementById('home-stats').innerHTML = `
+    <div class="hstat"><div class="hstat-n">🔥${streak}</div><div class="hstat-l">Day streak</div></div>
+    <div class="hstat"><div class="hstat-n">${S.totalLessons}</div><div class="hstat-l">Lessons done</div></div>
+    <div class="hstat"><div class="hstat-n">${S.srs.length}</div><div class="hstat-l">In revision</div></div>`;
+}
+
+function showDailyDetail(item) {
+  // Mark as done
+  if (!S.doneToday.includes(item.id)) {
+    S.doneToday.push(item.id);
+    save();
+  }
+  const inQ = S.srs.some(s => s.id === item.id);
+  document.getElementById('daily-detail').innerHTML = `
+    <button style="font-family:var(--font-body);font-size:13px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0 0 14px;display:flex;align-items:center;gap:4px" id="back-home">
+      ← Back to today
+    </button>
+    <div class="lesson-card">
+      <div class="card-head">
+        <div class="card-title">${item.title}</div>
+        <span class="tag ${tagClass(item.cat)}">${item.tag}</span>
+      </div>
+      <div class="card-def">${item.def}</div>
+      ${item.ex.map(e=>`<div class="card-ex">"${e}"</div>`).join('')}
+      <button class="add-btn ${inQ?'queued':''}" id="add-from-daily" data-id="${item.id}">
+        ${inQ?'✓ In revision queue':'+ Add to revision'}
+      </button>
+    </div>`;
+
+  document.getElementById('back-home').addEventListener('click', () => {
+    switchPage('home');
+    document.querySelector('[data-page="home"]').classList.add('active');
+    document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('[data-page="home"]').classList.add('active');
+  });
+
+  document.getElementById('add-from-daily').addEventListener('click', function() {
+    const id = this.dataset.id;
+    if (!S.srs.some(s=>s.id===id)) {
+      S.srs.push({id,interval:1,ease:2.5,due:Date.now(),reps:0});
+      this.textContent='✓ In revision queue';
+      this.classList.add('queued');
+      save();
+    }
+  });
+
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-daily').classList.add('active');
+}
+
+function calcStreak() {
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (S.completedDays.includes(ds)) { streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
+// ═══════════════════════════════════════════════
+//  LIBRARY
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    S.libCat = btn.dataset.cat;
+    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLibrary();
+  });
+});
+
+function renderLibrary() {
+  const items = S.libCat==='all' ? POOL : POOL.filter(i=>i.cat===S.libCat);
+  document.getElementById('library-list').innerHTML = items.map(item => {
+    const inQ = S.srs.some(s=>s.id===item.id);
+    return `<div class="lesson-card">
+      <div class="card-head">
+        <div class="card-title">${item.title}</div>
+        <span class="tag ${tagClass(item.cat)}">${item.tag}</span>
+      </div>
+      <div class="card-def">${item.def}</div>
+      ${item.ex.map(e=>`<div class="card-ex">"${e}"</div>`).join('')}
+      <button class="add-btn ${inQ?'queued':''}" data-id="${item.id}">${inQ?'✓ In revision':'+ Add to revision'}</button>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#library-list .add-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if (S.srs.some(s=>s.id===id)) return;
+      S.srs.push({id,interval:1,ease:2.5,due:Date.now(),reps:0});
+      btn.textContent='✓ In revision';
+      btn.classList.add('queued');
+      save();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  REVISION (SRS — SM-2 algorithm)
+// ═══════════════════════════════════════════════
+function renderRevision() {
+  const now = Date.now();
+  const due = S.srs.filter(s=>s.due<=now+86400000).sort((a,b)=>a.due-b.due);
+  const statsHTML = `<div class="srs-stats">
+    <div class="stat-card"><div class="stat-num">${S.srs.length}</div><div class="stat-lbl">In library</div></div>
+    <div class="stat-card"><div class="stat-num">${due.length}</div><div class="stat-lbl">Due today</div></div>
+    <div class="stat-card"><div class="stat-num">${S.srs.length-due.length}</div><div class="stat-lbl">Upcoming</div></div>
+  </div>`;
+
+  if (due.length === 0) {
+    document.getElementById('revision-content').innerHTML = statsHTML + `<div class="empty-state"><div class="empty-title">All caught up!</div><p>Tap the Library or Today tab and add items to your revision queue. They'll be scheduled using spaced repetition — items you find hard come back sooner.</p></div>`;
+    return;
+  }
+
+  const entry = due[0];
+  const item = POOL.find(i=>i.id===entry.id);
+  if (!item) { S.srs = S.srs.filter(s=>s.id!==entry.id); save(); renderRevision(); return; }
+
+  document.getElementById('revision-content').innerHTML = statsHTML + `
+  <div class="srs-card">
+    <span class="tag ${tagClass(item.cat)}">${item.tag}</span>
+    <div class="srs-word">${item.title}</div>
+    <div class="srs-hint">What does this mean?</div>
+    <button class="reveal-btn" id="rev-btn">Show answer</button>
+    <div id="srs-ans" style="display:none">
+      <div class="srs-def">${item.def}</div>
+      ${item.ex.map(e=>`<div class="srs-ex">"${e}"</div>`).join('')}
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;text-align:center">How well did you remember?</div>
+      <div class="rating-row">
+        <button class="rate-btn r-forgot" data-q="0" data-id="${item.id}">Forgot</button>
+        <button class="rate-btn r-hard" data-q="1" data-id="${item.id}">Hard</button>
+        <button class="rate-btn r-good" data-q="3" data-id="${item.id}">Good</button>
+        <button class="rate-btn r-easy" data-q="5" data-id="${item.id}">Easy</button>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('rev-btn').addEventListener('click', () => {
+    document.getElementById('srs-ans').style.display = 'block';
+    document.getElementById('rev-btn').style.display = 'none';
+  });
+
+  document.querySelectorAll('.rate-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id; const q = parseInt(btn.dataset.q);
+      const idx = S.srs.findIndex(s=>s.id===id);
+      if (idx === -1) return;
+      let s = S.srs[idx];
+      if (q < 3) { s.reps=0; s.interval=1; }
+      else {
+        s.reps++;
+        if (s.reps===1) s.interval=1;
+        else if (s.reps===2) s.interval=6;
+        else s.interval = Math.round(s.interval*s.ease);
+        s.ease = Math.max(1.3, s.ease + (0.1 - (5-q)*(0.08 + (5-q)*0.02)));
+      }
+      s.due = Date.now() + s.interval*86400000;
+      S.srs[idx] = s;
+      save();
+      renderRevision();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  QUIZ (picks 10 random from pool each time)
+// ═══════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startQuiz() {
+  S.quiz = { questions: shuffle(QUIZ_POOL).slice(0,10), idx:0, score:0, wrong:[], done:false };
+}
+
+function renderQuiz() {
+  const el = document.getElementById('quiz-content');
+  if (!S.quiz) { startQuiz(); }
+  const sess = S.quiz;
+
+  if (sess.done) {
+    const pct = Math.round(sess.score/sess.questions.length*100);
+    const grade = pct===100?'Flawless! 🎉':pct>=80?'Excellent!':pct>=60?'Good job!':pct>=40?'Keep going!':'Keep studying!';
+    el.innerHTML = `<div class="score-screen">
+      <div class="score-big">${sess.score}/${sess.questions.length}</div>
+      <div class="score-grade">${grade} &nbsp;${pct}%</div>
+      <div class="score-grid">
+        <div class="sg"><div class="sg-n">${sess.score}</div><div class="sg-l">Correct</div></div>
+        <div class="sg"><div class="sg-n">${sess.questions.length-sess.score}</div><div class="sg-l">Wrong</div></div>
+        <div class="sg"><div class="sg-n">${pct}%</div><div class="sg-l">Score</div></div>
+      </div>
+      ${sess.wrong.length>0?`<p style="font-size:13px;color:var(--ink3);margin-bottom:14px;">${sess.wrong.length} mistake${sess.wrong.length>1?'s':''} saved to your Review log.</p>`:`<p style="font-size:13px;color:var(--success);margin-bottom:14px;">No mistakes — perfect run!</p>`}
+      <div class="btn-col">
+        <button class="btn btn-primary" id="retake-btn">New quiz</button>
+        <button class="btn" id="to-log-btn">See review log</button>
+      </div>
+    </div>`;
+    document.getElementById('retake-btn').addEventListener('click', ()=>{ startQuiz(); renderQuiz(); });
+    document.getElementById('to-log-btn').addEventListener('click', ()=>{
+      document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector('[data-page="log"]').classList.add('active');
+      switchPage('log');
+    });
+    return;
+  }
+
+  const q = sess.questions[sess.idx];
+  const pct = Math.round(sess.idx/sess.questions.length*100);
+  el.innerHTML = `<div class="qcard">
+    <div class="qmeta">
+      <span class="qnum">${sess.idx+1}/${sess.questions.length}</span>
+      <div class="qprog"><div class="qprog-fill" style="width:${pct}%"></div></div>
+      <span class="tag ${tagClass(q.cat)}" style="font-size:10px">${tagLabel(q.cat)}</span>
+    </div>
+    <div class="qtxt">${q.q}</div>
+    ${q.ctx?`<div class="qctx">${q.ctx}</div>`:''}
+    <div class="q-opts">
+      ${q.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+    </div>
+    <div class="qfb" id="qfb"></div>
+  </div>`;
+
+  document.querySelectorAll('.qopt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.i);
+      document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+      const fb = document.getElementById('qfb');
+      if (i === q.ans) {
+        btn.classList.add('correct');
+        fb.textContent = '✓ Correct! ' + q.exp;
+        fb.className = 'qfb show qfb-ok';
+        S.quiz.score++;
+      } else {
+        btn.classList.add('wrong');
+        document.querySelector(`.qopt[data-i="${q.ans}"]`).classList.add('correct');
+        fb.textContent = '✗ Not quite. ' + q.exp;
+        fb.className = 'qfb show qfb-no';
+        const entry = {q:q.q,yours:q.opts[i],correct:q.opts[q.ans],exp:q.exp,cat:q.cat,date:new Date().toLocaleDateString()};
+        S.quiz.wrong.push(entry);
+        S.log.push(entry);
+        save();
+      }
+      setTimeout(() => {
+        S.quiz.idx++;
+        if (S.quiz.idx >= S.quiz.questions.length) S.quiz.done = true;
+        renderQuiz();
+      }, 2600);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  REVIEW LOG
+// ═══════════════════════════════════════════════
+function renderLog() {
+  const el = document.getElementById('log-content');
+  if (S.log.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-title">No mistakes yet</div><p>Complete the quiz — any wrong answers appear here with full explanations so you can study your weak spots.</p></div>`;
+    return;
+  }
+  const rev = [...S.log].reverse();
+  el.innerHTML = `<p style="font-size:12px;color:var(--ink3);margin-bottom:14px;">${S.log.length} recorded mistake${S.log.length>1?'s':''} — review these carefully</p>`
+    + rev.map(w=>`<div class="log-item">
+        <div class="log-meta">
+          <span class="tag ${tagClass(w.cat)}">${tagLabel(w.cat)}</span>
+          <span style="font-size:11px;color:var(--ink3)">${w.date}</span>
+        </div>
+        <div class="log-q">${w.q}</div>
+        <div class="log-yours">✗ Your answer: ${w.yours}</div>
+        <div class="log-correct">✓ Correct: ${w.correct}</div>
+        <div class="log-exp">${w.exp}</div>
+      </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  STREAK BADGE
+// ═══════════════════════════════════════════════
+function updateStreakBadge() {
+  const s = calcStreak();
+  document.getElementById('streak-el').textContent = s>0 ? `🔥 Day ${s}` : 'Day 1';
+}
+
+// ═══════════════════════════════════════════════
+//  INSTALL TIP (mobile only)
+// ═══════════════════════════════════════════════
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+  document.getElementById('install-tip').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+load();
+startQuiz();
+renderHome();
+updateStreakBadge();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
