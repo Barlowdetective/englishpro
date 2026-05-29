@@ -243,7 +243,7 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
 
     <div class="settings-section">
       <label class="settings-label">Google Gemini API Key</label>
-      <input class="settings-input" type="password" id="api-key-input" placeholder="Paste your AIza... key here"/>
+      <input class="settings-input" type="password" id="api-key-input" placeholder="Paste your Gemini.. key here"/>
       <div class="settings-hint">Your key is stored only on this device and sent directly to Google. It is never shared with anyone else.</div>
       <button class="settings-save" id="save-key-btn">Save API Key</button>
       <div class="settings-status" id="key-status"></div>
@@ -832,7 +832,7 @@ if(existingKey) keyInput.value=existingKey.slice(0,8)+'…';
 document.getElementById('save-key-btn').addEventListener('click',async()=>{
   const val=keyInput.value.trim();
   if(!val||val.includes('…')){keyStatus.textContent='Please paste your full API key.';keyStatus.className='settings-status show status-err';return;}
-  if(!val.startsWith('AIza')){keyStatus.textContent='This does not look like a Gemini key (should start with AIza…). Please check and try again.';keyStatus.className='settings-status show status-err';return;}
+  
 
   keyStatus.textContent='Testing your key…';keyStatus.className='settings-status show status-ok';
   // Quick test call
