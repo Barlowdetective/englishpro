@@ -8,8 +8,6 @@
 <meta name="apple-mobile-web-app-title" content="EnglishPro"/>
 <meta name="theme-color" content="#2d5a3d"/>
 <title>EnglishPro — Advanced English</title>
-<link rel="manifest" href="./manifest.json"/>
-<link rel="apple-touch-icon" href="./icons/icon-192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -149,6 +147,28 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
 .empty-state{text-align:center;padding:40px 20px;color:var(--ink3)}
 .empty-title{font-family:var(--font-display);font-size:18px;color:var(--ink2);margin-bottom:6px}
 
+
+/* ── PASSAGE ── */
+.passage-card{background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
+.passage-title{font-family:var(--font-display);font-size:18px;margin-bottom:4px}
+.passage-meta{font-size:11px;color:var(--ink3);margin-bottom:12px}
+.passage-body{font-size:14px;line-height:1.9;color:var(--ink2);margin-bottom:14px}
+.passage-body b{color:var(--ink);font-weight:600}
+.passage-q{font-size:14px;font-weight:500;margin-bottom:8px;line-height:1.5}
+.passage-opt{width:100%;text-align:left;padding:9px 12px;border-radius:var(--radius);border:1px solid var(--surface2);background:#fff;font-family:var(--font-body);font-size:13px;color:var(--ink);cursor:pointer;margin-bottom:6px;line-height:1.5}
+.passage-opt:active:not(:disabled){transform:scale(.98)}
+.passage-opt.correct{background:var(--success-light);border-color:var(--success);color:var(--success)}
+.passage-opt.wrong{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+.passage-fb{font-size:13px;padding:8px 12px;border-radius:var(--radius);margin-bottom:10px;display:none;line-height:1.6}
+.passage-fb.show{display:block}
+.speak-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:var(--radius);font-size:16px;line-height:1;vertical-align:middle;transition:transform .15s;color:var(--accent2)}
+.speak-btn:active{transform:scale(.85)}
+.speak-btn.speaking{color:var(--accent);animation:pulse 0.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.passage-score{text-align:center;padding:16px 0}
+.passage-score-n{font-family:var(--font-display);font-size:40px}
+.passage-score-l{font-size:13px;color:var(--ink3);margin-top:4px}
+
 .install-tip{background:var(--gold-light);border:1px solid #d4b060;border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--gold);margin-bottom:14px;line-height:1.6;display:none}
 </style>
 </head>
@@ -203,6 +223,11 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
     <div id="quiz-content"></div>
   </div>
 
+  <!-- PASSAGE -->
+  <div class="page" id="page-passage">
+    <div id="passage-content"></div>
+  </div>
+
   <!-- SETTINGS -->
   <div class="page" id="page-settings">
     <div id="settings-content"></div>
@@ -235,6 +260,10 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
   <button class="bnav-btn" data-page="log">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
     Review
+  </button>
+  <button class="bnav-btn" data-page="passage">
+    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    Passage
   </button>
   <button class="bnav-btn" data-page="settings">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -459,6 +488,7 @@ function switchPage(page) {
   if (page === 'quiz') { if (!S.quiz) startQuiz(); renderQuiz(); }
   if (page === 'log') renderLog();
   if (page === 'settings') renderSettings();
+  if (page === 'passage') renderPassage();
 }
 
 // ═══════════════════════════════════════════════
@@ -1026,6 +1056,295 @@ function renderSettings() {
       res.style.color = 'var(--danger)';
       res.textContent = '✗ Failed — check your API key is correct';
     }
+  });
+}
+
+
+// ═══════════════════════════════════════════════
+//  PRONUNCIATION (Web Speech API — free, offline)
+// ═══════════════════════════════════════════════
+function speak(text, btn) {
+  if (!window.speechSynthesis) { alert('Speech not supported on this browser'); return; }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US';
+  utt.rate = 0.9;
+  utt.pitch = 1;
+  if (btn) {
+    btn.classList.add('speaking');
+    utt.onend = () => btn.classList.remove('speaking');
+    utt.onerror = () => btn.classList.remove('speaking');
+  }
+  window.speechSynthesis.speak(utt);
+}
+
+// Patch renderLibrary to add speak buttons
+const _origRenderLibrary = renderLibrary;
+function renderLibrary() {
+  const items = S.libCat==='all' ? POOL : POOL.filter(i=>i.cat===S.libCat);
+  document.getElementById('library-list').innerHTML = items.map(item => {
+    const inQ = S.srs.some(s=>s.id===item.id);
+    const speakText = item.title + '. ' + item.def + '. ' + item.ex.join('. ');
+    return `<div class="lesson-card">
+      <div class="card-head">
+        <div class="card-title">${item.title} <button class="speak-btn" data-speak="${item.id}" title="Listen">🔊</button></div>
+        <span class="tag ${tagClass(item.cat)}">${item.tag}</span>
+      </div>
+      <div class="card-def">${item.def}</div>
+      ${item.ex.map(e=>`<div class="card-ex">"${e}"</div>`).join('')}
+      <button class="add-btn ${inQ?'queued':''}" data-id="${item.id}">${inQ?'✓ In revision':'+ Add to revision'}</button>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#library-list .add-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if (S.srs.some(s=>s.id===id)) return;
+      S.srs.push({id,interval:1,ease:2.5,due:Date.now(),reps:0});
+      btn.textContent='✓ In revision';
+      btn.classList.add('queued');
+      save();
+    });
+  });
+
+  document.querySelectorAll('#library-list .speak-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = POOL.find(i=>i.id===btn.dataset.speak);
+      if (!item) return;
+      speak(item.title + '. ' + item.def + '. For example: ' + item.ex[0], btn);
+    });
+  });
+}
+
+// Also patch daily detail to show speak button
+const _origShowDailyDetail = showDailyDetail;
+function showDailyDetail(item) {
+  if (!S.doneToday.includes(item.id)) { S.doneToday.push(item.id); save(); }
+  const inQ = S.srs.some(s => s.id === item.id);
+  document.getElementById('daily-detail').innerHTML = `
+    <button style="font-family:var(--font-body);font-size:13px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0 0 14px;display:flex;align-items:center;gap:4px" id="back-home">← Back to today</button>
+    <div class="lesson-card">
+      <div class="card-head">
+        <div class="card-title">${item.title} <button class="speak-btn" id="daily-speak" title="Listen">🔊</button></div>
+        <span class="tag ${tagClass(item.cat)}">${item.tag}</span>
+      </div>
+      <div class="card-def">${item.def}</div>
+      ${item.ex.map(e=>`<div class="card-ex">"${e}"</div>`).join('')}
+      <button class="add-btn ${inQ?'queued':''}" id="add-from-daily" data-id="${item.id}">
+        ${inQ?'✓ In revision queue':'+ Add to revision'}
+      </button>
+    </div>`;
+
+  document.getElementById('back-home').addEventListener('click', () => {
+    switchPage('home');
+    document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('[data-page="home"]').classList.add('active');
+  });
+  document.getElementById('daily-speak').addEventListener('click', function() {
+    speak(item.title + '. ' + item.def + '. For example: ' + item.ex[0], this);
+  });
+  document.getElementById('add-from-daily').addEventListener('click', function() {
+    const id = this.dataset.id;
+    if (!S.srs.some(s=>s.id===id)) {
+      S.srs.push({id,interval:1,ease:2.5,due:Date.now(),reps:0});
+      this.textContent='✓ In revision queue';
+      this.classList.add('queued');
+      save();
+    }
+  });
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-daily').classList.add('active');
+}
+
+// ═══════════════════════════════════════════════
+//  DAILY PASSAGE — Built-in fallback pool
+// ═══════════════════════════════════════════════
+const PASSAGE_POOL = [
+  {
+    title:"The Art of Deep Work",
+    level:"Upper Intermediate",
+    body:`In an era of constant distraction, the ability to focus deeply on cognitively demanding tasks has become increasingly <b>rare</b> — and therefore increasingly <b>valuable</b>. Author Cal Newport coined the term "deep work" to describe professional activities performed in a state of distraction-free concentration that push cognitive capabilities to their limit.\n\nThose who cultivate this skill, Newport argues, are able to produce better results in less time. In contrast, "shallow work" — tasks like checking email, attending meetings, and browsing social media — can be performed while distracted and add little new value to the world.\n\nBuilding a deep work habit requires deliberate practice. Many successful practitioners schedule uninterrupted blocks of time, disconnect from the internet, and train their ability to tolerate boredom — resisting the urge to reach for their phone at the first sign of mental difficulty.`,
+    questions:[
+      {q:"What does 'deep work' refer to according to Cal Newport?",opts:["Checking emails carefully","Focused work that stretches cognitive ability","Attending important meetings","Browsing the internet for research"],ans:1,exp:"Newport defines deep work as distraction-free concentration on demanding tasks that push cognitive limits."},
+      {q:"What is 'shallow work' characterised by?",opts:["High creative output","Long uninterrupted focus","Tasks done while distracted with little new value","Work done late at night"],ans:2,exp:"Shallow work includes tasks like checking email that can be done while distracted and don't create much new value."},
+      {q:"What does 'cultivate' mean in this context?",opts:["Destroy","Develop carefully over time","Measure","Replace"],ans:1,exp:"'Cultivate' means to develop or nurture something over time through deliberate effort."},
+    ]
+  },
+  {
+    title:"Why Sleep Matters More Than You Think",
+    level:"Intermediate",
+    body:`For decades, sleep was considered a passive state — something the body did when it had nothing better to do. Modern neuroscience has completely overturned this view. During sleep, the brain is extraordinarily <b>active</b>, performing critical functions that simply cannot happen while you are awake.\n\nOne of the most important of these is memory <b>consolidation</b>. While you sleep, the hippocampus replays the day's experiences and transfers key information to the cortex for long-term storage. This is why students who sleep after studying consistently outperform those who stay up all night revising.\n\nSleep also flushes out toxic waste products that accumulate in the brain during waking hours. Chronic sleep deprivation has been linked to an increased risk of Alzheimer's disease, depression, and cardiovascular problems. Most adults need between seven and nine hours per night — not as a luxury, but as a biological necessity.`,
+    questions:[
+      {q:"What was the old view of sleep?",opts:["It was seen as essential for learning","It was considered a passive, unimportant state","It was thought to be dangerous","It was linked to creativity"],ans:1,exp:"For decades, sleep was mistakenly seen as passive — something the body did when idle. Neuroscience has since disproved this."},
+      {q:"What is 'memory consolidation'?",opts:["Forgetting unimportant information","The process of transferring memories into long-term storage","A type of deep sleep","Reading before bed"],ans:1,exp:"Memory consolidation is when the brain replays and transfers experiences from short-term to long-term storage during sleep."},
+      {q:"What does 'chronic' mean in 'chronic sleep deprivation'?",opts:["Occasional","Severe and sudden","Persisting over a long period","Related to illness"],ans:2,exp:"'Chronic' means something that persists over a long time, as opposed to being occasional or acute."},
+    ]
+  },
+  {
+    title:"The Psychology of Habits",
+    level:"Upper Intermediate",
+    body:`Habits are the invisible architecture of everyday life. According to researcher Charles Duhigg, every habit follows a simple three-part loop: a <b>cue</b> that triggers the behaviour, the <b>routine</b> itself, and a <b>reward</b> that reinforces the loop. Understanding this structure is the key to changing unwanted habits or building new ones.\n\nThe brain loves habits because they are efficient. Once a behaviour becomes habitual, it requires little conscious effort — freeing up mental resources for more demanding tasks. This is why experienced drivers can hold a conversation while navigating familiar roads.\n\nBreaking a bad habit rarely works through willpower alone. A more effective strategy is to keep the existing cue and reward, but insert a new routine in between. Smokers, for instance, often find success by replacing the cigarette with a walk or a stick of gum — keeping the stress-relief reward while changing the behaviour itself.`,
+    questions:[
+      {q:"What are the three parts of the habit loop?",opts:["Goal, action, result","Cue, routine, reward","Trigger, effort, outcome","Signal, behaviour, feeling"],ans:1,exp:"Duhigg's habit loop consists of a cue (trigger), routine (the behaviour), and reward (the reinforcement)."},
+      {q:"Why does the brain prefer habitual behaviour?",opts:["It is more creative","It requires less conscious effort","It produces better results","It is more enjoyable"],ans:1,exp:"Habits are efficient — once established, they need little conscious processing, freeing mental resources for other tasks."},
+      {q:"What is the most effective way to break a bad habit according to the passage?",opts:["Use strong willpower","Avoid the cue entirely","Keep the cue and reward but change the routine","Reward yourself more frequently"],ans:2,exp:"The passage suggests keeping the existing cue and reward intact, but substituting a new routine — making the change sustainable."},
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════════
+//  DAILY PASSAGE — AI generation
+// ═══════════════════════════════════════════════
+async function generatePassageAI() {
+  const key = getGeminiKey();
+  if (!key) return null;
+
+  const seenTitles = JSON.parse(localStorage.getItem('ep_passage_seen') || '[]');
+
+  const prompt = `You are an advanced English teacher. Generate a daily reading passage for a Japanese adult learner studying advanced English.
+
+Do NOT use these topics already covered: ${seenTitles.slice(-20).join(', ')}
+
+Return ONLY valid JSON, no markdown, no explanation:
+{
+  "title": "Engaging title (4-6 words)",
+  "level": "Upper Intermediate or Advanced",
+  "body": "A well-written passage of 120-150 words on an interesting topic (science, psychology, business, culture, technology, nature). Bold 3-4 key vocabulary words using <b>word</b> tags. Write in clear, sophisticated English.",
+  "questions": [
+    {
+      "q": "Comprehension or vocabulary question about the passage",
+      "opts": ["Option A", "Option B", "Option C", "Option D"],
+      "ans": 0,
+      "exp": "Brief explanation of why this answer is correct"
+    },
+    {
+      "q": "Second question",
+      "opts": ["Option A", "Option B", "Option C", "Option D"],
+      "ans": 1,
+      "exp": "Explanation"
+    },
+    {
+      "q": "Third question — test a vocabulary word from the passage",
+      "opts": ["Option A", "Option B", "Option C", "Option D"],
+      "ans": 2,
+      "exp": "Explanation"
+    }
+  ]
+}`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents: [{parts:[{text: prompt}]}],
+        generationConfig: {temperature: 0.9, maxOutputTokens: 1000}
+      })
+    });
+    const data = await res.json();
+    if (data.error) return null;
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const passage = JSON.parse(clean);
+    if (!passage.title || !passage.body || !passage.questions) return null;
+
+    // Cache and record
+    localStorage.setItem('ep_passage_today', JSON.stringify({date: todayStr(), passage}));
+    const newSeen = [...seenTitles, passage.title];
+    localStorage.setItem('ep_passage_seen', JSON.stringify(newSeen.slice(-50)));
+    return passage;
+  } catch(e) {
+    console.warn('Passage AI failed:', e);
+    return null;
+  }
+}
+
+async function getTodayPassage() {
+  const cached = JSON.parse(localStorage.getItem('ep_passage_today') || 'null');
+  if (cached && cached.date === todayStr()) return cached.passage;
+  const ai = await generatePassageAI();
+  if (ai) return ai;
+  // Fallback
+  const day = getDayNumber();
+  return PASSAGE_POOL[day % PASSAGE_POOL.length];
+}
+
+// ═══════════════════════════════════════════════
+//  PASSAGE PAGE RENDERER
+// ═══════════════════════════════════════════════
+async function renderPassage() {
+  const el = document.getElementById('passage-content');
+  el.innerHTML = `<div class="empty-state"><div class="empty-title">Loading passage…</div><p>Fetching today's reading</p></div>`;
+
+  const passage = await getTodayPassage();
+
+  let qAnswered = 0;
+  let qCorrect = 0;
+  const total = passage.questions.length;
+
+  el.innerHTML = `
+    <div class="passage-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div>
+          <div class="passage-title">${passage.title}</div>
+          <div class="passage-meta">${passage.level} · ${todayStr()}</div>
+        </div>
+        <button class="speak-btn" id="passage-speak" title="Listen to passage" style="font-size:20px;flex-shrink:0;margin-top:4px">🔊</button>
+      </div>
+      <div class="passage-body">${passage.body.replace(/\n/g,'<br/><br/>')}</div>
+    </div>
+
+    <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Comprehension questions</div>
+
+    ${passage.questions.map((q,qi) => `
+    <div class="passage-card" id="pq-${qi}">
+      <div class="passage-q">${qi+1}. ${q.q}</div>
+      <div id="popts-${qi}">
+        ${q.opts.map((o,oi) => `<button class="passage-opt" data-qi="${qi}" data-oi="${oi}">${String.fromCharCode(65+oi)}. ${o}</button>`).join('')}
+      </div>
+      <div class="passage-fb" id="pfb-${qi}"></div>
+    </div>`).join('')}
+
+    <div id="passage-score-area"></div>`;
+
+  // Speak button
+  document.getElementById('passage-speak').addEventListener('click', function() {
+    const plain = passage.body.replace(/<[^>]+>/g,'');
+    speak(plain, this);
+  });
+
+  // Question answering
+  document.querySelectorAll('.passage-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qi = parseInt(btn.dataset.qi);
+      const oi = parseInt(btn.dataset.oi);
+      const q = passage.questions[qi];
+      document.querySelectorAll(`[data-qi="${qi}"]`).forEach(b => b.disabled = true);
+      const fb = document.getElementById(`pfb-${qi}`);
+      if (oi === q.ans) {
+        btn.classList.add('correct');
+        fb.textContent = '✓ Correct! ' + q.exp;
+        fb.className = 'passage-fb show qfb-ok';
+        qCorrect++;
+      } else {
+        btn.classList.add('wrong');
+        document.querySelector(`[data-qi="${qi}"][data-oi="${q.ans}"]`).classList.add('correct');
+        fb.textContent = '✗ ' + q.exp;
+        fb.className = 'passage-fb show qfb-no';
+      }
+      qAnswered++;
+      if (qAnswered === total) {
+        const pct = Math.round(qCorrect/total*100);
+        const grade = pct===100?'Perfect! 🎉':pct>=67?'Well done!':'Keep reading!';
+        document.getElementById('passage-score-area').innerHTML = `
+          <div class="passage-card passage-score">
+            <div class="passage-score-n">${qCorrect}/${total}</div>
+            <div class="passage-score-l">${grade}</div>
+          </div>`;
+      }
+    });
   });
 }
 </script>
