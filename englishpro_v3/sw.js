@@ -1,10 +1,9 @@
-const CACHE = 'englishpro-v1';
+const CACHE = 'englishpro-v4';
 const ASSETS = [
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap'
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', e => {
@@ -25,6 +24,10 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('/index.html')))
+    fetch(e.request).then(res => {
+      const resClone = res.clone();
+      caches.open(CACHE).then(cache => cache.put(e.request, resClone));
+      return res;
+    }).catch(() => caches.match(e.request).then(c => c || caches.match('./index.html')))
   );
 });
