@@ -171,6 +171,21 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
 .passage-score-n{font-family:var(--font-display);font-size:40px}
 .passage-score-l{font-size:13px;color:var(--ink3);margin-top:4px}
 
+
+.day-nav{display:flex;align-items:center;gap:6px;margin-bottom:16px}
+.daynav-btn{height:34px;border-radius:99px;border:1px solid var(--surface2);background:#fff;font-size:13px;color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);padding:0 12px;flex-shrink:0}
+.daynav-btn:active{background:var(--surface)}
+#day-prev,#day-next{width:34px;padding:0;font-size:18px}
+.daynav-cal{flex:1;font-size:12px;color:var(--accent)}
+.daynav-today{background:var(--accent);color:#fff;border-color:var(--accent);font-size:12px;font-weight:500}
+.today-pill{display:inline-block;font-size:11px;font-weight:500;background:var(--accent);color:#fff;padding:3px 10px;border-radius:99px;margin-bottom:14px}
+.viewing-pill{display:inline-block;font-size:11px;font-weight:500;background:var(--warn-light);color:var(--warn);padding:3px 10px;border-radius:99px;margin-bottom:14px}
+.date-picker-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.date-picker-overlay.show{display:flex}
+.date-picker-box{background:#fff;border-radius:var(--radius-lg);padding:20px;width:100%;max-width:320px}
+.date-picker-box input{width:100%;padding:12px;border:1px solid var(--surface2);border-radius:var(--radius);font-family:var(--font-body);font-size:15px;margin-bottom:14px}
+.date-picker-actions{display:flex;gap:8px}
+
 .install-tip{background:var(--gold-light);border:1px solid #d4b060;border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--gold);margin-bottom:14px;line-height:1.6;display:none}
 </style>
 </head>
@@ -189,7 +204,8 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
       <b>Install as app:</b> tap your browser's Share → "Add to Home Screen" for quick daily access.
     </div>
     <div class="date-label" id="date-label"></div>
-    <div class="home-title">Today's lesson</div>
+    <div class="home-title" id="home-title-text">Today's lesson</div>
+    <div class="day-nav" id="day-nav"></div>
     <div class="daily-grid" id="daily-grid"></div>
     <div class="section-hdr">This week</div>
     <div class="week-row" id="week-row"></div>
@@ -242,6 +258,7 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
 
 </div>
 
+
 <nav class="bottom-nav">
   <button class="bnav-btn active" data-page="home">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -278,7 +295,6 @@ body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-
 //  CONTENT POOL — 80+ items, 5 categories
 // ═══════════════════════════════════════════════
 const POOL = [
-  // VOCABULARY (20)
   {id:'v1',cat:'vocab',title:'Serendipity',tag:'Noun',def:'A happy or beneficial discovery made entirely by chance.',ex:['Meeting my closest friend on that delayed train was pure serendipity.']},
   {id:'v2',cat:'vocab',title:'Candid',tag:'Adjective',def:'Truthful and frank, even about uncomfortable matters.',ex:['I appreciate your candid feedback — it helped me improve far more than praise would.']},
   {id:'v3',cat:'vocab',title:'Ambiguous',tag:'Adjective',def:'Open to more than one interpretation; lacking a single clear meaning.',ex:['The contract wording was deliberately ambiguous, leaving room for later dispute.']},
@@ -299,8 +315,6 @@ const POOL = [
   {id:'v18',cat:'vocab',title:'Articulate',tag:'Adjective / Verb',def:'(adj) Able to speak fluently and clearly. (v) To express an idea clearly.',ex:['She\'s highly articulate — she can articulate complex ideas in plain language.']},
   {id:'v19',cat:'vocab',title:'Obsolete',tag:'Adjective',def:'No longer in use; outdated and replaced by something newer.',ex:['Many skills that were essential a decade ago are now completely obsolete.']},
   {id:'v20',cat:'vocab',title:'Volatile',tag:'Adjective',def:'Liable to change rapidly and unpredictably; unstable.',ex:['The market has been volatile this quarter, swinging wildly between gains and losses.']},
-
-  // IDIOMS (16)
   {id:'i1',cat:'idiom',title:'On the fence',tag:'Idiom',def:'Undecided; not yet having made a clear choice between two options.',ex:["I'm still on the fence about the job offer — the salary is great but the commute is brutal."]},
   {id:'i2',cat:'idiom',title:'Bite off more than you can chew',tag:'Idiom',def:'To take on more responsibility than you can realistically handle.',ex:['She agreed to lead four projects simultaneously and quickly bit off more than she could chew.']},
   {id:'i3',cat:'idiom',title:'Pull the rug out from under',tag:'Idiom',def:'To suddenly withdraw support, leaving someone in a difficult position.',ex:['Cancelling the funding a week before launch pulled the rug out from under the whole team.']},
@@ -317,8 +331,6 @@ const POOL = [
   {id:'i14',cat:'idiom',title:'Under the weather',tag:'Idiom',def:'Feeling slightly ill or unwell.',ex:["I'm a bit under the weather today — I think I'm coming down with a cold."]},
   {id:'i15',cat:'idiom',title:'The tip of the iceberg',tag:'Idiom',def:'A small, visible part of a much larger, mostly hidden problem or situation.',ex:['Those complaints are just the tip of the iceberg — there are far deeper issues at play.']},
   {id:'i16',cat:'idiom',title:'Sit on the fence',tag:'Idiom',def:'To deliberately avoid committing to one side in an argument or decision.',ex:['The manager sat on the fence throughout the dispute rather than taking a side.']},
-
-  // GRAMMAR (12)
   {id:'g1',cat:'grammar',title:'Inverted conditionals',tag:'Grammar',def:'Replaces "if" clauses by moving the auxiliary verb to the front. Used in formal writing and speech.',ex:['Standard: "If I had known, I would have called." → Inverted: "Had I known, I would have called."','Were she to resign, the board would need to reconsider its position.']},
   {id:'g2',cat:'grammar',title:'Cleft sentences',tag:'Grammar',def:'Uses "It is/was … that/who …" to place strong emphasis on one element of a sentence.',ex:['"It was the budget, not the timeline, that concerned the board most."','It was she who first raised the alarm about the discrepancy.']},
   {id:'g3',cat:'grammar',title:'Subjunctive mood',tag:'Grammar',def:'Used after verbs of suggestion, demand, or importance. The verb stays in its bare base form regardless of subject.',ex:['I suggest that he be informed immediately.','It is essential that she attend — note "attend", not "attends".']},
@@ -331,8 +343,6 @@ const POOL = [
   {id:'g10',cat:'grammar',title:'Fronting for emphasis',tag:'Grammar',def:'Moving an element from its normal position to the front of the sentence to give it greater emphasis.',ex:['Normal: "I have never seen such dedication."','Fronted: "Never have I seen such dedication." (more emphatic, formal)']},
   {id:'g11',cat:'grammar',title:'Ellipsis in formal writing',tag:'Grammar',def:'Omitting words that can be understood from context to avoid repetition and improve flow.',ex:['Full: "She can play piano and she can also play guitar."','Ellipsis: "She can play piano and guitar." (second "she can play" omitted)']},
   {id:'g12',cat:'grammar',title:'Hedging language',tag:'Grammar',def:'Using language that softens statements, shows uncertainty, or avoids strong commitment. Essential in academic and professional writing.',ex:['"The results suggest that…" rather than "The results prove that…"','"It would appear that costs may increase." (hedging with modal + appear)']},
-
-  // PHRASAL VERBS (16)
   {id:'p1',cat:'phrasal',title:'Brush up on',tag:'Phrasal verb',def:'To refresh or improve a skill or knowledge area you already have.',ex:['I need to brush up on my presentation skills before the conference.']},
   {id:'p2',cat:'phrasal',title:'Iron out',tag:'Phrasal verb',def:'To resolve remaining problems or discrepancies, especially smaller ones.',ex:['We still need to iron out a few contractual details before the signing.']},
   {id:'p3',cat:'phrasal',title:'Come across',tag:'Phrasal verb',def:'1. To find something by chance. 2. To make a certain impression on others.',ex:['I came across a fascinating paper while researching the topic.','She comes across as highly competent in client meetings.']},
@@ -349,8 +359,6 @@ const POOL = [
   {id:'p14',cat:'phrasal',title:'Carry out',tag:'Phrasal verb',def:'To complete a task, instruction, or plan; to execute.',ex:['The team carried out extensive testing before the product launch.']},
   {id:'p15',cat:'phrasal',title:'Fall through',tag:'Phrasal verb',def:'(Of a plan or deal) to fail to happen or be completed.',ex:['The acquisition fell through at the last minute due to regulatory concerns.']},
   {id:'p16',cat:'phrasal',title:'Build on',tag:'Phrasal verb',def:'To use something already established as a foundation for further development.',ex:['The second phase of the project builds on the success of the pilot.']},
-
-  // BUSINESS (16)
   {id:'b1',cat:'biz',title:'Circle back',tag:'Business',def:'To return to a topic or issue at a later point after handling other matters.',ex:["Let's park this for now and circle back on Thursday once we have the data."]},
   {id:'b2',cat:'biz',title:'Streamline',tag:'Business',def:'To make a process more efficient by removing unnecessary complexity.',ex:['The new software streamlined onboarding from three weeks down to five days.']},
   {id:'b3',cat:'biz',title:'Leverage',tag:'Business',def:'To use a resource, advantage, or position to its maximum effect.',ex:['We can leverage our existing distribution network to enter three new markets at once.']},
@@ -367,6 +375,80 @@ const POOL = [
   {id:'b14',cat:'biz',title:'Pivot',tag:'Business',def:'To make a significant change in strategy or direction, especially in response to market feedback.',ex:['When the original product failed, the startup pivoted to a B2B model.']},
   {id:'b15',cat:'biz',title:'Due diligence',tag:'Business',def:'The process of thoroughly investigating something before making a decision or commitment.',ex:['We need to complete our due diligence before agreeing to the acquisition.']},
   {id:'b16',cat:'biz',title:'Align',tag:'Business',def:'To bring people, teams, or plans into agreement and working toward the same goals.',ex:['The first meeting was about aligning the two departments on the project vision.']},
+  {id:'v21',cat:'vocab',title:'Resilient',tag:'Adjective',def:'Able to recover quickly from difficulties; tough and adaptable.',ex:['The local economy proved remarkably resilient despite the global downturn.']},
+  {id:'v22',cat:'vocab',title:'Conducive',tag:'Adjective',def:'Making a certain situation or outcome likely or possible.',ex:['A quiet workspace is conducive to deep concentration.']},
+  {id:'v23',cat:'vocab',title:'Plausible',tag:'Adjective',def:'Seeming reasonable or probable; believable.',ex:['She offered a plausible explanation for the delay.']},
+  {id:'v24',cat:'vocab',title:'Innate',tag:'Adjective',def:'Inborn; existing from birth rather than acquired.',ex:['Some psychologists argue that a sense of fairness is innate in young children.']},
+  {id:'v25',cat:'vocab',title:'Ubiquitous',tag:'Adjective',def:'Present, appearing, or found everywhere.',ex:['Smartphones have become ubiquitous in modern daily life.']},
+  {id:'v26',cat:'vocab',title:'Discern',tag:'Verb',def:'To perceive or recognise something, often with difficulty.',ex:['It was hard to discern any pattern in the scattered data.']},
+  {id:'v27',cat:'vocab',title:'Lucid',tag:'Adjective',def:'Expressed clearly; easy to understand.',ex:['Her lucid explanation made a complex topic feel simple.']},
+  {id:'v28',cat:'vocab',title:'Skeptical',tag:'Adjective',def:'Not easily convinced; having doubts about claims.',ex:["Investors remained skeptical about the startup's wildly optimistic projections."]},
+  {id:'v29',cat:'vocab',title:'Mitigate',tag:'Verb',def:'To make something less severe, serious, or painful.',ex:['The company introduced new measures to mitigate the risk of data breaches.']},
+  {id:'v30',cat:'vocab',title:'Versatile',tag:'Adjective',def:'Able to adapt to many different functions or activities.',ex:['She is a versatile employee, equally comfortable with design and analytics.']},
+  {id:'v31',cat:'vocab',title:'Inherent',tag:'Adjective',def:'Existing as a natural or basic part of something.',ex:['There is an inherent risk in any new business venture.']},
+  {id:'v32',cat:'vocab',title:'Coherent',tag:'Adjective',def:'Logical and well-organised; easy to follow.',ex:['The report presented a coherent argument from start to finish.']},
+  {id:'v33',cat:'vocab',title:'Skeptical',tag:'Adjective',def:'Not easily convinced; having doubts.',ex:['Investors remained skeptical about the startup\'s ambitious projections.']},
+  {id:'v34',cat:'vocab',title:'Perpetual',tag:'Adjective',def:'Continuing forever or for a very long time without interruption.',ex:['The factory operates on a perpetual three-shift cycle.']},
+  {id:'v35',cat:'vocab',title:'Notion',tag:'Noun',def:'A belief, idea, or understanding about something.',ex:['The notion that money buys happiness has been widely studied and debated.']},
+  {id:'i17',cat:'idiom',title:'Throw in the towel',tag:'Idiom',def:'To give up on an effort or attempt; to quit.',ex:['After three failed attempts, he finally threw in the towel.']},
+  {id:'i18',cat:'idiom',title:'Jump on the bandwagon',tag:'Idiom',def:'To join others in doing something popular or fashionable.',ex:['Once the trend took off, every major brand jumped on the bandwagon.']},
+  {id:'i19',cat:'idiom',title:'Cut to the chase',tag:'Idiom',def:'To get to the main point without wasting time on unnecessary details.',ex:["Let's cut to the chase — are we extending the contract or not?"]},
+  {id:'i20',cat:'idiom',title:'Keep someone in the loop',tag:'Idiom',def:'To keep someone informed about what is happening.',ex:['Please keep me in the loop on any developments this week.']},
+  {id:'i21',cat:'idiom',title:'Go the extra mile',tag:'Idiom',def:'To make a special effort beyond what is required.',ex:['She always goes the extra mile to make sure clients are satisfied.']},
+  {id:'i22',cat:'idiom',title:'A double-edged sword',tag:'Idiom',def:'Something that has both positive and negative effects.',ex:['Social media is a double-edged sword for small businesses.']},
+  {id:'i23',cat:'idiom',title:'Hit the ground running',tag:'Idiom',def:'To start something quickly and energetically without delay.',ex:['The new manager hit the ground running, restructuring the team in her first week.']},
+  {id:'i24',cat:'idiom',title:'Take something with a grain of salt',tag:'Idiom',def:'To not take something too seriously or literally; to view it with skepticism.',ex:['You should take online reviews with a grain of salt.']},
+  {id:'i25',cat:'idiom',title:'Back to the drawing board',tag:'Idiom',def:'To start a plan or task again from the beginning, usually after failure.',ex:['The prototype failed its safety test, so it was back to the drawing board.']},
+  {id:'i26',cat:'idiom',title:'Raise the bar',tag:'Idiom',def:'To increase the standard or expectation for something.',ex:['Their latest product has really raised the bar for the entire industry.']},
+  {id:'i27',cat:'idiom',title:'In the pipeline',tag:'Idiom',def:'In progress or being planned, not yet completed.',ex:['We have several new features in the pipeline for next quarter.']},
+  {id:'i28',cat:'idiom',title:'Open the floodgates',tag:'Idiom',def:'To allow a sudden, overwhelming rush of something, often after restriction.',ex:['Lowering the eligibility criteria opened the floodgates for new applicants.']},
+  {id:'i29',cat:'idiom',title:'Tip the scales',tag:'Idiom',def:'To be the deciding factor that changes the outcome of a situation.',ex:['Her testimony tipped the scales in favour of the defendant.']},
+  {id:'i30',cat:'idiom',title:'A storm in a teacup',tag:'Idiom',def:'A great fuss made over a trivial or unimportant matter.',ex:['The disagreement turned out to be a storm in a teacup once they actually talked.']},
+  {id:'i31',cat:'idiom',title:'A drop in the ocean',tag:'Idiom',def:'An amount so small it makes no significant difference.',ex:["The donation was generous, but it was a drop in the ocean compared to what's needed."]},
+  {id:'g13',cat:'grammar',title:'Mixed conditionals',tag:'Grammar',def:'Combines a past condition with a present result, or a present condition with a past result.',ex:['If I had taken that job, I would be living in Tokyo now. (past condition, present result)','If she were more organised, she would have finished on time. (present condition, past result)']},
+  {id:'g14',cat:'grammar',title:'Reported speech with modal shifts',tag:'Grammar',def:'When reporting speech, modal verbs often shift backward in formality: will→would, can→could, must→had to.',ex:['Direct: "I will attend." → Reported: She said she would attend.','Direct: "You must finish today." → Reported: He said I had to finish that day.']},
+  {id:'g15',cat:'grammar',title:'Emphatic do/does/did',tag:'Grammar',def:'Adding do/does/did before the base verb to add emphasis in affirmative sentences.',ex:['"I do understand your concern, but the policy cannot change."','She did warn us, though we ignored her advice at the time.']},
+  {id:'g16',cat:'grammar',title:'Concession clauses',tag:'Grammar',def:'Clauses that acknowledge a contrasting point, often using although, even though, despite, in spite of.',ex:['Although the proposal was rejected, the team learned valuable lessons.','Despite the setbacks, sales grew by twelve percent.']},
+  {id:'g17',cat:'grammar',title:'Reduced relative clauses',tag:'Grammar',def:'Shortening a relative clause by removing the relative pronoun and auxiliary verb, common in formal writing.',ex:['Full: "The report that was submitted yesterday is incomplete."','Reduced: "The report submitted yesterday is incomplete."']},
+  {id:'g18',cat:'grammar',title:'Modal verbs of deduction',tag:'Grammar',def:'Using must, might, could, and can\'t to express degrees of certainty about something.',ex:['"She must be the new manager — she has the corner office."','"He can\'t have finished already — it\'s only been five minutes."']},
+  {id:'g19',cat:'grammar',title:'Comparative emphasis structures',tag:'Grammar',def:'Using "the more… the more…" or "far/by far" to intensify comparisons.',ex:['The more data we collect, the more accurate our model becomes.','This option is by far the most cost-effective.']},
+  {id:'g20',cat:'grammar',title:'Passive voice for objectivity',tag:'Grammar',def:'Using passive constructions to sound more formal and remove the focus on who performed an action — common in academic and business writing.',ex:['Active: "We made several errors." → Passive: "Several errors were made."','The decision was reached after careful consideration of all factors.']},
+  {id:'p17',cat:'phrasal',title:'Take on',tag:'Phrasal verb',def:'To accept responsibility for a task, role, or challenge.',ex:['She took on the project despite her already heavy workload.']},
+  {id:'p18',cat:'phrasal',title:'Hold off',tag:'Phrasal verb',def:'To delay or postpone an action.',ex:['Let\'s hold off on the announcement until the contract is finalised.']},
+  {id:'p19',cat:'phrasal',title:'Roll out',tag:'Phrasal verb',def:'To launch or introduce something officially, often gradually.',ex:['The company plans to roll out the new feature to all users by March.']},
+  {id:'p20',cat:'phrasal',title:'Sort out',tag:'Phrasal verb',def:'To resolve a problem or organise something properly.',ex:['We still need to sort out the logistics before the event.']},
+  {id:'p21',cat:'phrasal',title:'Step up',tag:'Phrasal verb',def:'To increase effort or take on more responsibility, often in response to a challenge.',ex:['When the lead engineer left, she stepped up and took charge of the project.']},
+  {id:'p22',cat:'phrasal',title:'Touch base',tag:'Phrasal verb',def:'To make brief contact with someone, often to check on progress.',ex:["Let's touch base again on Friday to review where things stand."]},
+  {id:'p23',cat:'phrasal',title:'Look into',tag:'Phrasal verb',def:'To investigate or examine something carefully.',ex:['The committee agreed to look into the complaint before responding.']},
+  {id:'p24',cat:'phrasal',title:'Wrap up',tag:'Phrasal verb',def:'To finish or conclude something.',ex:['Let\'s wrap up the meeting — we\'re running short on time.']},
+  {id:'p25',cat:'phrasal',title:'Branch out',tag:'Phrasal verb',def:'To expand into a new area of activity, beyond what one usually does.',ex:['After years in retail, the company decided to branch out into e-commerce.']},
+  {id:'p26',cat:'phrasal',title:'Take over',tag:'Phrasal verb',def:'To assume control of something, often from someone else.',ex:['She took over the department after the previous director resigned.']},
+  {id:'b17',cat:'biz',title:'Buy-in',tag:'Business',def:'Agreement and support from stakeholders for a plan or decision.',ex:['Without buy-in from senior leadership, the initiative is unlikely to succeed.']},
+  {id:'b18',cat:'biz',title:'Touchpoint',tag:'Business',def:'Any point of interaction between a customer and a company.',ex:['We mapped every customer touchpoint, from the website to the support line.']},
+  {id:'b19',cat:'biz',title:'Bottom line',tag:'Business',def:'The final, most important consideration, often referring to net profit.',ex:['At the end of the day, the bottom line is what matters to shareholders.']},
+  {id:'b20',cat:'biz',title:'Game changer',tag:'Business',def:'Something that significantly changes the way a situation or industry operates.',ex:['The new AI feature was a real game changer for customer service efficiency.']},
+  {id:'b21',cat:'biz',title:'Onboarding',tag:'Business',def:'The process of integrating a new employee or customer into an organisation.',ex:['A smooth onboarding process helps new hires become productive faster.']},
+  {id:'b22',cat:'biz',title:'Touch points aside, the core value proposition',tag:'Business',def:'The fundamental benefit a product or service offers to customers, distinct from features.',ex:['Our value proposition centres on speed and reliability, not just low price.']},
+  {id:'b23',cat:'biz',title:'Run rate',tag:'Business',def:'A financial estimate based on extrapolating current results over a longer period.',ex:["At the current run rate, we'll exceed our annual target by 15%."]},
+  {id:'b24',cat:'biz',title:'Headcount',tag:'Business',def:'The total number of employees within a company or department.',ex:['Headcount in the engineering team has doubled over the past year.']},
+  {id:'b25',cat:'biz',title:'Touch and go',tag:'Business',def:'An uncertain situation that could go either way.',ex:['It was touch and go whether the funding round would close in time.']},
+  {id:'b26',cat:'biz',title:'Quick win',tag:'Business',def:'A small task that can be completed quickly to show early progress.',ex:['Before tackling the redesign, the team identified a few quick wins to build momentum.']},
+  {id:'v36',cat:'vocab',title:'Subtle',tag:'Adjective',def:'So delicate or precise as to be difficult to notice or analyse.',ex:['There was a subtle shift in tone partway through the negotiation.']},
+  {id:'v37',cat:'vocab',title:'Diligent',tag:'Adjective',def:'Showing care and conscientiousness in one\'s work or duties.',ex:['Her diligent research uncovered details the original team had overlooked.']},
+  {id:'v38',cat:'vocab',title:'Compelling',tag:'Adjective',def:'Evoking interest in a way that is difficult to resist; convincing.',ex:['The lawyer presented a compelling case to the jury.']},
+  {id:'v39',cat:'vocab',title:'Feasible',tag:'Adjective',def:'Possible to do easily or conveniently; practical.',ex:['Given the budget, a six-month timeline is simply not feasible.']},
+  {id:'v40',cat:'vocab',title:'Redundant',tag:'Adjective',def:'No longer needed or useful; superfluous.',ex:['Several steps in the old process became redundant after automation.']},
+  {id:'b27',cat:'biz',title:'Buy-in',tag:'Business',def:'Agreement and support from stakeholders for a proposed plan or decision.',ex:['We need executive buy-in before rolling out the new policy company-wide.']},
+  {id:'b28',cat:'biz',title:'Touchpoint',tag:'Business',def:'Any point of interaction between a customer and a company.',ex:['Mapping every customer touchpoint helped us identify where satisfaction was dropping.']},
+  {id:'b29',cat:'biz',title:'Granular',tag:'Business',def:'Involving great detail; broken down into small, specific parts.',ex:['We need a more granular breakdown of expenses by department.']},
+  {id:'b30',cat:'biz',title:'Cross-functional',tag:'Business',def:'Involving members from different departments or areas of expertise working together.',ex:['A cross-functional team was assembled to launch the new product.']},
+  {id:'b31',cat:'biz',title:'Onboard (verb)',tag:'Business',def:'To integrate a new employee, client, or partner into a system or organisation.',ex:['It typically takes two weeks to fully onboard a new hire.']},
+  {id:'b32',cat:'biz',title:'Touch points notwithstanding, the core ask',tag:'Business',def:'"The ask" refers to the specific request or demand being made in a negotiation or proposal.',ex:['Before the meeting, make sure everyone understands exactly what the ask is.']},
+  {id:'b33',cat:'biz',title:'Move the needle',tag:'Business',def:'To make a meaningful, measurable difference or impact.',ex:['This marketing campaign needs to actually move the needle on sales.']},
+  {id:'b34',cat:'biz',title:'Table the discussion',tag:'Business',def:'To postpone discussing a topic until a later time.',ex:["Let's table this discussion and revisit it once we have more data."]},
+  {id:'b35',cat:'biz',title:'Take it offline',tag:'Business',def:'To discuss something privately later, rather than in the current meeting.',ex:['That\'s a great question — let\'s take it offline after the call.']},
+  {id:'b36',cat:'biz',title:'Headwinds',tag:'Business',def:'Negative external factors that hinder progress or growth.',ex:['Despite strong execution, the company faced significant economic headwinds this year.']}
+
 ];
 
 // ═══════════════════════════════════════════════
@@ -402,23 +484,32 @@ const QUIZ_POOL = [
 // based on the date — so every user sees the same daily set
 // but it rotates each day.
 
-function getDayNumber() {
+function getDayNumber(dateObj) {
   const base = new Date('2024-01-01').getTime();
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  return Math.floor((today - base) / 86400000);
+  const d = dateObj || new Date();
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  return Math.floor((target - base) / 86400000);
 }
 
-function getDailyItems() {
-  const day = getDayNumber();
+function getDailyItems(dateObj) {
+  const day = getDayNumber(dateObj);
   const cats = ['vocab','idiom','grammar','phrasal','biz'];
   return cats.map(cat => {
     const pool = POOL.filter(i => i.cat === cat);
     const idx = day % pool.length;
-    // offset each category to avoid same-index collisions
     const offsets = {vocab:0,idiom:3,grammar:7,phrasal:2,biz:5};
     return pool[(idx + offsets[cat]) % pool.length];
   });
+}
+
+function getViewDate() {
+  return S.viewDate ? new Date(S.viewDate) : new Date();
+}
+function isViewingToday() {
+  return !S.viewDate || S.viewDate === todayStr();
+}
+function dateStrOf(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 // ═══════════════════════════════════════════════
@@ -430,6 +521,7 @@ let S = {
   quiz: null,
   libCat: 'all',
   doneToday: [],    // ids of daily items marked read today
+  viewDate: null,    // currently viewed date (null = today)
   completedDays: [], // date strings 'YYYY-MM-DD'
   totalLessons: 0,
 };
@@ -497,17 +589,40 @@ function switchPage(page) {
 //  HOME
 // ═══════════════════════════════════════════════
 function renderHome() {
-  // Date label
-  const now = new Date();
+  const viewing = isViewingToday();
+  const now = viewing ? new Date() : getViewDate();
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('date-label').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+  document.getElementById('date-label').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}${now.getFullYear()!==new Date().getFullYear()?', '+now.getFullYear():''}`;
 
-  // Daily tiles
-  // Will be set by async loader below
-  const daily = window._todayItems || getDailyItems();
+  document.getElementById('home-title-text').textContent = viewing ? "Today's lesson" : "That day's lesson";
+
+  // Day nav controls
+  document.getElementById('day-nav').innerHTML = `
+    <button class="daynav-btn" id="day-prev" title="Previous day">‹</button>
+    <button class="daynav-btn daynav-cal" id="day-cal" title="Pick a date">📅 ${viewing ? 'Jump to date' : dateStrOf(now)}</button>
+    <button class="daynav-btn" id="day-next" title="Next day">›</button>
+    ${!viewing ? '<button class="daynav-btn daynav-today" id="day-today">Today</button>' : ''}
+  `;
+  document.getElementById('day-prev').addEventListener('click', () => {
+    const d = getViewDate(); d.setDate(d.getDate()-1);
+    S.viewDate = dateStrOf(d); save();
+    refreshHomeForDate();
+  });
+  document.getElementById('day-next').addEventListener('click', () => {
+    const d = getViewDate(); d.setDate(d.getDate()+1);
+    S.viewDate = dateStrOf(d); save();
+    refreshHomeForDate();
+  });
+  document.getElementById('day-cal').addEventListener('click', () => openDatePicker());
+  const todayBtn = document.getElementById('day-today');
+  if (todayBtn) todayBtn.addEventListener('click', () => { S.viewDate = null; save(); refreshHomeForDate(); });
+
+  // Daily tiles — use cached AI items only for actual today; otherwise compute from pool
+  const daily = viewing ? (window._todayItems || getDailyItems(now)) : getDailyItems(now);
+  const dateKey = dateStrOf(now);
   const allDone = daily.every(item => S.doneToday.includes(item.id));
-  if (allDone && !S.completedDays.includes(todayStr())) {
+  if (viewing && allDone && !S.completedDays.includes(todayStr())) {
     S.completedDays.push(todayStr());
     S.totalLessons++;
     save();
@@ -523,25 +638,35 @@ function renderHome() {
   document.querySelectorAll('.daily-tile').forEach(tile => {
     tile.addEventListener('click', () => {
       const id = tile.dataset.id;
-      const item = POOL.find(i => i.id === id);
+      const item = POOL.find(i => i.id === id) || daily.find(i=>i.id===id);
       if (!item) return;
       showDailyDetail(item);
     });
   });
 
-  // Week strip
+  // Week strip (always shows the real current week, regardless of viewDate)
+  const realNow = new Date();
   const weekEl = document.getElementById('week-row');
   const dayNames = ['S','M','T','W','T','F','S'];
-  const todayDow = now.getDay();
-  const weekStart = new Date(now); weekStart.setDate(now.getDate() - todayDow);
+  const todayDow = realNow.getDay();
+  const weekStart = new Date(realNow); weekStart.setDate(realNow.getDate() - todayDow);
   weekEl.innerHTML = Array.from({length:7},(_,i)=>{
     const d = new Date(weekStart); d.setDate(weekStart.getDate()+i);
-    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const ds = dateStrOf(d);
     const done = S.completedDays.includes(ds);
     const isToday = ds === todayStr();
+    const isViewed = ds === dateKey && !viewing;
     const cls = done?'wd-done':isToday?'wd-today':'wd-empty';
-    return `<div class="week-day"><div class="week-day-lbl">${dayNames[i]}</div><div class="week-dot ${cls}">${done?'✓':d.getDate()}</div></div>`;
+    return `<div class="week-day" data-ds="${ds}" style="cursor:pointer"><div class="week-day-lbl">${dayNames[i]}</div><div class="week-dot ${cls}" style="${isViewed?'box-shadow:0 0 0 2px var(--accent2)':''}">${done?'✓':d.getDate()}</div></div>`;
   }).join('');
+  document.querySelectorAll('.week-day').forEach(el => {
+    el.addEventListener('click', () => {
+      const ds = el.dataset.ds;
+      S.viewDate = ds === todayStr() ? null : ds;
+      save();
+      refreshHomeForDate();
+    });
+  });
 
   // Stats
   const streak = calcStreak();
@@ -549,6 +674,38 @@ function renderHome() {
     <div class="hstat"><div class="hstat-n">🔥${streak}</div><div class="hstat-l">Day streak</div></div>
     <div class="hstat"><div class="hstat-n">${S.totalLessons}</div><div class="hstat-l">Lessons done</div></div>
     <div class="hstat"><div class="hstat-n">${S.srs.length}</div><div class="hstat-l">In revision</div></div>`;
+}
+
+function refreshHomeForDate() {
+  // When viewing a non-today date, always use pool-based items (no AI cache mixing)
+  renderHome();
+}
+
+function openDatePicker() {
+  const overlay = document.createElement('div');
+  overlay.id = 'date-picker-overlay';
+  overlay.style = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
+  const current = isViewingToday() ? todayStr() : S.viewDate;
+  overlay.innerHTML = `
+    <div style="background:var(--paper);border-radius:var(--radius-lg);padding:20px;max-width:320px;width:100%">
+      <div style="font-family:var(--font-display);font-size:18px;margin-bottom:12px">Jump to a date</div>
+      <input type="date" id="date-picker-input" value="${current}" max="${todayStr()}" min="2024-01-01"
+        style="width:100%;padding:10px;border:1px solid var(--surface2);border-radius:var(--radius);font-family:var(--font-body);font-size:14px;margin-bottom:14px;background:#fff;color:var(--ink)"/>
+      <div style="display:flex;gap:8px">
+        <button id="date-picker-cancel" style="flex:1;padding:10px;border-radius:var(--radius);border:1px solid var(--surface2);background:var(--surface);font-family:var(--font-body);font-size:13px;cursor:pointer">Cancel</button>
+        <button id="date-picker-go" style="flex:1;padding:10px;border-radius:var(--radius);border:none;background:var(--accent);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer">Go</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('date-picker-cancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('date-picker-go').addEventListener('click', () => {
+    const val = document.getElementById('date-picker-input').value;
+    if (!val) { overlay.remove(); return; }
+    S.viewDate = val === todayStr() ? null : val;
+    save();
+    overlay.remove();
+    refreshHomeForDate();
+  });
 }
 
 function showDailyDetail(item) {
@@ -843,6 +1000,12 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
 // ═══════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════
+//  DAY NAVIGATION (prev/next/jump-to-date)
+// ═══════════════════════════════════════════════
+
 load();
 startQuiz();
 updateStreakBadge();
@@ -968,12 +1131,19 @@ async function getTodayItems() {
   const cached = JSON.parse(localStorage.getItem('ep_ai_today') || 'null');
   if (cached && cached.date === todayStr()) return cached.items;
 
-  // Try AI generation
-  const aiItems = await generateDailyItemsAI();
-  if (aiItems) return aiItems;
+  // No key set — go straight to reliable built-in content, no network call
+  if (!getGeminiKey()) return null;
 
-  // Fallback to built-in pool
-  return null; // getDailyItems() used as fallback
+  // Try AI generation with a timeout so a slow/bad connection never blocks the app
+  try {
+    const aiItems = await Promise.race([
+      generateDailyItemsAI(),
+      new Promise(resolve => setTimeout(() => resolve(null), 6000))
+    ]);
+    if (aiItems) return aiItems;
+  } catch(e) { /* silent — fall back below */ }
+
+  return null; // built-in pool used as reliable fallback
 }
 
 // ═══════════════════════════════════════════════
@@ -990,7 +1160,7 @@ function renderSettings() {
 
   document.getElementById('settings-content').innerHTML = `
     <h2 style="font-family:var(--font-display);font-size:20px;margin-bottom:4px">AI Settings</h2>
-    <p style="font-size:13px;color:var(--ink3);margin-bottom:20px">Powered by Google Gemini — free, unlimited daily lessons</p>
+    <p style="font-size:13px;color:var(--ink3);margin-bottom:20px">Optional bonus: connect Gemini for unlimited fresh AI lessons. Without a key, EnglishPro reliably uses its large built-in library — over a month of unique content.</p>
 
     <div style="background:#fff;border:1px solid var(--surface2);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">
       <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:10px">Gemini API Key</div>
@@ -1266,9 +1436,17 @@ Return ONLY valid JSON, no markdown, no explanation:
 async function getTodayPassage() {
   const cached = JSON.parse(localStorage.getItem('ep_passage_today') || 'null');
   if (cached && cached.date === todayStr()) return cached.passage;
-  const ai = await generatePassageAI();
-  if (ai) return ai;
-  // Fallback
+
+  if (getGeminiKey()) {
+    try {
+      const ai = await Promise.race([
+        generatePassageAI(),
+        new Promise(resolve => setTimeout(() => resolve(null), 6000))
+      ]);
+      if (ai) return ai;
+    } catch(e) { /* silent fallback */ }
+  }
+  // Reliable built-in fallback — rotates through the day number so it still varies daily
   const day = getDayNumber();
   return PASSAGE_POOL[day % PASSAGE_POOL.length];
 }
